@@ -95,15 +95,14 @@ async def role_routine():
                 await member.remove_roles(old_role)
     
     for i, lis in enumerate(change_list):
-        if lis:
-          if len(lis) == 1:
-              await channel.send(lis[0])
-          else:
-              names = []
-              for memb in lis:
-                names.append(memb.split(' is')[0])
-              names = ", ".join(names)
-              await channel.send(f"{names} are now {role_list[i]}")
+      if len(lis) == 1:
+        await channel.send(lis[0])
+      elif len(lis) > 1:
+        names = []
+        for memb in lis:
+          names.append(memb.split(' is')[0])
+        names = ", ".join(names)
+        await channel.send(f"{names} are now {role_list[i]}!!")
 
     channel = client.get_channel(862542970099204098)
     await channel.send(random.choice(db["chismes"]))
@@ -254,7 +253,7 @@ async def on_message(message):
         await message.channel.send("Está bem, você não sai daí :nail_care::flag_br:")
 
     if message.content.startswith("Patch notes"):
-        embed = discord.Embed(title="Chismosa Patch Notes v1.4", description="Umghhh, so I found out that la Chismosa can also react to messages, so now everytime that you talk about men, she's gonna let you know that she is into whatever you're saying :smirk::woman_tipping_hand:")
+        embed = discord.Embed(title="Chismosa Patch Notes v1.4", description="Houla jermanas!!!, this version only  changed chismosa's rola routine to fit our default sister roles :woman_technologist: and I've implemented a new and smarter way to display changes.")
         await message.channel.send(content=None, embed=embed)
 
     if re.match(re.compile("c+h+i+s+m+o+s+a+ +i+ +l+i+k+e+ +m+e+n+", re.I), message.content):
