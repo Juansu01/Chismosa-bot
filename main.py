@@ -49,7 +49,7 @@ def get_member_days(member):
     return delta.days
 
 async def role_routine():
-    role_list = ["Sister", "Sister Menor", "Hermana del Medio", "Sister Mayor"]
+    role_list = ["Sister 💁‍♀️", "Sister Menor 🙆‍♀️", "Hermana del Medio 💇‍♀️", "Sister Mayor 🙇‍♀️"]
     channel = client.get_channel(862591362369191966)
     member_list = get_all_members()
     change_list = [[], [], [], []]
