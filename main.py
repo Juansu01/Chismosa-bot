@@ -49,7 +49,7 @@ def get_member_days(member):
     return delta.days
 
 async def role_routine():
-    role_list = ["Sister 💁‍♀️", "Sister Menor 🙆‍♀️", "Hermana del Medio 💇‍♀️", "Sister Mayor 🙇‍♀️"]
+    role_list = ["Sister.💁‍♀️", "Sister Menor.🙆‍♀️", "Hermana del Medio.💇‍♀️", "Sister Mayor.🙇‍♀️"]
     channel = client.get_channel(862591362369191966)
     member_list = get_all_members()
     change_list = [[], [], [], []]
@@ -66,7 +66,7 @@ async def role_routine():
             old_role = discord.utils.get(member.guild.roles, name="Hermanastra")
             if new_role not in roles:
                 print("Granting: {} role: Sister".format(member))
-                change_list[0].append("{} is now a Sister!".format(remove_tag(str(member))))
+                change_list[0].append("{} is now a Sister! 💁‍♀️".format(remove_tag(str(member))))
                 await member.add_roles(new_role)
                 await member.remove_roles(old_role)
         elif days >= 90 and days < 180:
@@ -74,7 +74,7 @@ async def role_routine():
             old_role = discord.utils.get(member.guild.roles, name="Sister")
             if new_role not in roles:
                 print("Granting: {} role: Sister Menor".format(member))
-                change_list[1].append("{} is now a Sister Menor!".format(remove_tag(str(member))))
+                change_list[1].append("{} is now a Sister Menor! 🙆‍♀️".format(remove_tag(str(member))))
                 await member.add_roles(new_role)
                 await member.remove_roles(old_role)
         elif days >= 180 and days < 300:
@@ -82,7 +82,7 @@ async def role_routine():
             old_role = discord.utils.get(member.guild.roles, name="Sister Menor")
             if new_role not in roles:
                 print("Granting: {} role: Hermana del Medio".format(member))
-                change_list[2].append("{} is now a Hermana del Medio!".format(remove_tag(str(member))))
+                change_list[2].append("{} is now a Hermana del Medio! 💇‍♀️".format(remove_tag(str(member))))
                 await member.add_roles(new_role)
                 await member.remove_roles(old_role)
         elif days >= 300:
@@ -90,7 +90,7 @@ async def role_routine():
             old_role = discord.utils.get(member.guild.roles, name="Hermana del Medio")
             if new_role not in roles:
                 print("Granting: {} role: Sister Mayor".format(member))
-                change_list[3].append("{} is now a Sister Mayor!".format(remove_tag(str(member))))
+                change_list[3].append("{} is now a Sister Mayor! 🙇‍♀️".format(remove_tag(str(member))))
                 await member.add_roles(new_role)
                 await member.remove_roles(old_role)
     
@@ -102,7 +102,8 @@ async def role_routine():
         for memb in lis:
           names.append(memb.split(' is')[0])
         names = ", ".join(names)
-        await channel.send(f"{names} are now {role_list[i]}!!")
+        role_name, emoji = role_list[i].split(".")
+        await channel.send(f"{names} are now {role_name}!!!{emoji}")
 
     channel = client.get_channel(862542970099204098)
     await channel.send(random.choice(db["chismes"]))
