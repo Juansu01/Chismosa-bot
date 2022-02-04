@@ -11,13 +11,16 @@ from replit import db
 from keep_alive import keep_alive
 import random
 from discord.utils import get
+import nacl
+
 
 activity = discord.Activity(type=discord.ActivityType.listening, name="BLACKPINK")
 intents = discord.Intents.default()
 intents.members = True
-client = commands.Bot(command_prefix=',', intents=intents, activity=activity)
+client = commands.Bot(command_prefix='-', intents=intents)
 load_dotenv('.env')
 my_secret = os.environ['key']
+
 
 chisme_permissions = ["Shubham#2936", "JuanC#1899"]
 
@@ -112,14 +115,6 @@ async def role_routine():
 async def on_member_join(member):
     new_role = discord.utils.get(member.guild.roles, name="Hermanastra")
     await member.add_roles(new_role)
-
-@client.event
-async def get_member_day(message):
-    print('working')
-
-@client.event
-async def on_ready():
-    print("Our bot is logged in as {0.user}".format(client))
 
 @client.event
 async def on_message(message):
@@ -261,6 +256,22 @@ async def on_message(message):
     if re.match(re.compile("c+h+i+s+m+o+s+a+ +i+ +l+i+k+e+ +m+e+n+", re.I), message.content):
       await message.channel.send("Bien ahí, sigue así, mi nena :woman_tipping_hand:")
 
+    await client.process_commands(message)
+
+@client.event
+async def on_ready():
+    print("Our bot is logged in as {0.user}".format(client))
+
+@client.command(pass_context = True)
+async def join(ctx):
+  channel = ctx.author.voice.channel
+  await channel.connect()
+
+@client.command(pass_context = True)
+async def leave(ctx):
+    await ctx.voice_client.disconnect()
+
+
 @tasks.loop(hours=24)
 async def called_once_a_day():
     await role_routine()
@@ -269,7 +280,7 @@ async def called_once_a_day():
 async def before():
     await client.wait_until_ready()
     print("Finished waiting")
-
 called_once_a_day.start()
+
 keep_alive()
 client.run(my_secret)
