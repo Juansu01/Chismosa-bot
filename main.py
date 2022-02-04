@@ -159,7 +159,8 @@ async def on_message(message):
       for i in range(0, len(tuple_list), 3):
         await message.channel.send("\n".join(tuple_list[i:i + 3]))
 
-    if message.content == "Chismosa I'm depressed":
+
+    if re.match(re.compile("(Chismosa|chismosa) (I’m|I'm) (depressed)", re.I), message.content):
         quote = get_quote()
         await message.channel.send(quote)
 
@@ -244,8 +245,8 @@ async def on_message(message):
             else:
                 await message.channel.send("Hermanaa, we don't have that many chismes :pinching_hand:")
         
-    if "men" in str(message.content) or "Men" in str(message.content):
-        if "women" in str(message.content) or "Women" in str(message.content):
+    if "men" in str(message.content.lower()):
+        if "women" in str(message.content.lower()) or "Women" in str(message.content):
             return
         emoji = get(client.emojis, name='face_lip_bite')
         await message.add_reaction(emoji)
