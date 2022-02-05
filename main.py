@@ -12,17 +12,25 @@ from keep_alive import keep_alive
 import random
 from discord.utils import get
 import nacl
+import youtube_dl
+import pafy
 
 
 activity = discord.Activity(type=discord.ActivityType.listening, name="BLACKPINK")
 intents = discord.Intents.default()
 intents.members = True
-client = commands.Bot(command_prefix='-', intents=intents)
+client = commands.Bot(command_prefix='Chismosa ', intents=intents)
 load_dotenv('.env')
 my_secret = os.environ['key']
 
 
 chisme_permissions = ["Shubham#2936", "JuanC#1899"]
+
+async def search_song(amount, song, get_url=False):
+   info = await client.loop.run_in_executor(None, lambda: youtube_dl.YoutubeDL({"format" : "bestaudio", "quiet" : True}).extract_info(f"ytsearch{amount}:{song}", download=False, ie_key="YoutubeSearch"))
+
+   if len(info["entries"]) == 0: return None
+   return [entry["webpage_url"] for entry in info["entries"]] if get_url else info
 
 def trigger_function():
   asyncio.run(role_routine())
@@ -263,14 +271,41 @@ async def on_ready():
     print("Our bot is logged in as {0.user}".format(client))
 
 @client.command(pass_context = True)
-async def join(ctx):
+async def play(ctx, url):
+  if ctx.author.voice is None:
+    await ctx.send("Gurl, join a voice channel pls.")
   channel = ctx.author.voice.channel
-  await channel.connect()
+  if ctx.voice_client is None:
+    await channel.connect()
+  else:
+    await ctx.voice_client.move_to(channel)
+
+  result = await search_song(1, url, get_url=True)
+  song = result[0]
+  print(song)
+
+  FFMPEG_OPTIONS = {'before_options': '-reconnect 1 -reconnect_streamed 1 -reconnect_delay_max 5', 'options': '-vn'}
+  YDL_OPTIONS = {'format':"bestaudio"}
+
+  vc = ctx.voice_client
+
+  with youtube_dl.YoutubeDL(YDL_OPTIONS) as ydl:
+    info = ydl.extract_info(song, download=False)
+    url2 = info['formats'][0]['url']
+    source = await discord.FFmpegOpusAudio.from_probe(url2, **FFMPEG_OPTIONS)
+    vc.play(source)
+
+@client.command(pass_context = True)
+async def resume(ctx):
+    await ctx.guild.voice_client.resume()
+
+@client.command(pass_context = True)
+async def pause(ctx):
+    await ctx.guild.voice_client.pause()
 
 @client.command(pass_context = True)
 async def leave(ctx):
-    await ctx.voice_client.disconnect()
-
+    await ctx.guild.voice_client.disconnect()
 
 @tasks.loop(hours=24)
 async def called_once_a_day():
