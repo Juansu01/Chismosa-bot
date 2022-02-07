@@ -19,7 +19,7 @@ import pafy
 activity = discord.Activity(type=discord.ActivityType.listening, name="BLACKPINK")
 intents = discord.Intents.default()
 intents.members = True
-client = commands.Bot(command_prefix='Chismosa ', intents=intents)
+client = commands.Bot(command_prefix='Chismosa ', intents=intents, activity=activity)
 load_dotenv('.env')
 my_secret = os.environ['key']
 
