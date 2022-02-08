@@ -275,7 +275,8 @@ async def on_message(message):
 async def on_ready():
     print("Our bot is logged in as {0.user}".format(client))
     channel = client.get_channel(862591362369191966)
-    await channel.send(random.choice(db["chismes"]))
+    embed = discord.Embed(title="Chismosa Patch Notes v1.6", description="Hiii sisters!!! This new chismosa patch brings a brand new feature, la chismosa can now play music, use the command \"Chismosa help\" if you want to know how to use this new feature.")
+    await channel.send(content=None, embed=embed)
     
 
 @client.command(pass_context = True)
