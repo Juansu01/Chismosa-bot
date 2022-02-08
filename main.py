@@ -1,4 +1,5 @@
 import discord
+import nacl
 import os
 from discord.ext import commands
 from datetime import date
@@ -11,7 +12,6 @@ from replit import db
 from keep_alive import keep_alive
 import random
 from discord.utils import get
-import nacl
 import youtube_dl
 import pafy
 
@@ -22,6 +22,7 @@ intents.members = True
 client = commands.Bot(command_prefix='Chismosa ', intents=intents, activity=activity)
 load_dotenv('.env')
 my_secret = os.environ['key']
+client.remove_command('help')
 
 
 chisme_permissions = ["Shubham#2936", "JuanC#1899"]
@@ -142,6 +143,10 @@ async def on_message(message):
         embed.add_field(name="Del Chisme <number>", value="Deletes a chisme, number is the positon of the chisme in the current chisme list.")
         embed.add_field(name="List Chismes", value="Shows all the chismes that La Chismosa is currently holding.")
         embed.add_field(name="Patch notes", value="La Chismosa will send you a message with her latest change.")
+        embed.add_field(name="Chismosa play <song>", value="La Chismosa will search for the song and play it.")
+        embed.add_field(name="Chismosa pause", value="La Chismosa will pause the song she is currently playing.")
+        embed.add_field(name="Chismosa resume", value="La Chismosa will resume the song she was previously playing.")
+        embed.add_field(name="Chismosa leave", value="La Chismosa will leave the voice channel.")
         await message.channel.send(content=None, embed=embed)
 
     if message.content == "do routine":
@@ -258,7 +263,7 @@ async def on_message(message):
         await message.channel.send("Está bem, você não sai daí :nail_care::flag_br:")
 
     if message.content.startswith("Patch notes"):
-        embed = discord.Embed(title="Chismosa Patch Notes v1.4", description="Houla jermanas!!!, this version only  changed chismosa's rola routine to fit our default sister roles :woman_technologist: and I've implemented a new and smarter way to display changes.")
+        embed = discord.Embed(title="Chismosa Patch Notes v1.6", description="Hiii sisters!!! This new chismosa patch brings a brand new feature, la chismosa can now play music, use the command \"Chismosa help\" if you want to know how to use this new feature.")
         await message.channel.send(content=None, embed=embed)
 
     if re.match(re.compile("c+h+i+s+m+o+s+a+ +i+ +l+i+k+e+ +m+e+n+", re.I), message.content):
@@ -269,9 +274,15 @@ async def on_message(message):
 @client.event
 async def on_ready():
     print("Our bot is logged in as {0.user}".format(client))
+    channel = client.get_channel(862591362369191966)
+    await channel.send(random.choice(db["chismes"]))
+    
 
 @client.command(pass_context = True)
 async def play(ctx, url):
+  if ctx.voice_client:
+    ctx.voice_client.stop()
+  url = ctx.message.content[14:]
   if ctx.author.voice is None:
     await ctx.send("Gurl, join a voice channel pls.")
   channel = ctx.author.voice.channel
@@ -293,6 +304,7 @@ async def play(ctx, url):
     info = ydl.extract_info(song, download=False)
     url2 = info['formats'][0]['url']
     source = await discord.FFmpegOpusAudio.from_probe(url2, **FFMPEG_OPTIONS)
+    await ctx.send("Playing :woman_tipping_hand::notes: : {}".format(song))
     vc.play(source)
 
 @client.command(pass_context = True)
@@ -305,7 +317,11 @@ async def pause(ctx):
 
 @client.command(pass_context = True)
 async def leave(ctx):
-    await ctx.guild.voice_client.disconnect()
+    if ctx.voice_client is None:
+      await ctx.send("I'm not even connected to a voice channel, *liek* wtfff :rolling_eyes:")
+    else:
+      await ctx.send("Bye girl :face_gun_smiling:")
+      await ctx.guild.voice_client.disconnect()
 
 @tasks.loop(hours=24)
 async def called_once_a_day():
