@@ -25,7 +25,7 @@ my_secret = os.environ['key']
 client.remove_command('help')
 
 
-chisme_permissions = ["Shubham#2936", "JuanC#1899"]
+chisme_permissions = ["Shubham#2936", "Ju1899"]
 
 async def search_song(amount, song, get_url=False):
    info = await client.loop.run_in_executor(None, lambda: youtube_dl.YoutubeDL({"format" : "bestaudio", "quiet" : True}).extract_info(f"ytsearch{amount}:{song}", download=False, ie_key="YoutubeSearch"))
@@ -160,6 +160,9 @@ async def on_message(message):
             print("Member: {} Days in server: {}".format(member, get_member_days(member)))
 
     if message.content == "List Chismes":
+      if str(message.author) not in chisme_permissions:
+            await message.channel.send("Gurl, you're liek, not allowed to do that :face_with_hand_over_mouth:")
+            return
       chisme_list = list(db["chismes"])
       tuple_list = []
       for (i, item) in enumerate(chisme_list , start=1):
@@ -262,9 +265,10 @@ async def on_message(message):
     if message.content.startswith("Vamos lá?"):
         await message.channel.send("Está bem, você não sai daí :nail_care::flag_br:")
 
-    if message.content.startswith("Patch notes"):
-        embed = discord.Embed(title="Chismosa Patch Notes v1.6", description="Hiii sisters!!! This new chismosa patch brings a brand new feature, la chismosa can now play music, use the command \"Chismosa help\" if you want to know how to use this new feature.")
-        await message.channel.send(content=None, embed=embed)
+    if message.content.startswith("Send patch notes"):
+        embed = discord.Embed(title="Chismosa Patch Notes v1.7", description="Umghhh, I just added some permissions to some commands xd, remember to use \"Chismosa help\" if you need help with the commands.")
+        channel = client.get_channel(862542970099204098)
+        await channel.send(content=None, embed=embed)
 
     if re.match(re.compile("c+h+i+s+m+o+s+a+ +i+ +l+i+k+e+ +m+e+n+", re.I), message.content):
       await message.channel.send("Bien ahí, sigue así, mi nena :woman_tipping_hand:")
@@ -274,11 +278,7 @@ async def on_message(message):
 @client.event
 async def on_ready():
     print("Our bot is logged in as {0.user}".format(client))
-    channel = client.get_channel(862591362369191966)
-    embed = discord.Embed(title="Chismosa Patch Notes v1.6", description="Hiii sisters!!! This new chismosa patch brings a brand new feature, la chismosa can now play music, use the command \"Chismosa help\" if you want to know how to use this new feature.")
-    await channel.send(content=None, embed=embed)
     
-
 @client.command(pass_context = True)
 async def play(ctx, url):
   if ctx.voice_client:
@@ -321,7 +321,8 @@ async def leave(ctx):
     if ctx.voice_client is None:
       await ctx.send("I'm not even connected to a voice channel, *liek* wtfff :rolling_eyes:")
     else:
-      await ctx.send("Bye girl :face_gun_smiling:")
+      emoji = get(client.emojis, name='face_gun_smiling')
+      await ctx.send("Bye girl {}".format(emoji))
       await ctx.guild.voice_client.disconnect()
 
 @tasks.loop(hours=24)
