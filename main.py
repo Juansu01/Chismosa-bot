@@ -2,10 +2,9 @@ import discord
 import nacl
 import os
 from discord.ext import commands
-from datetime import date
 from dotenv import load_dotenv
 import re
-from utils import remove_tag, get_chisme, get_quote, update_chismes, delete_chisme
+from utils import *
 import asyncio
 from discord.ext import tasks
 from replit import db
@@ -14,6 +13,7 @@ import random
 from discord.utils import get
 import youtube_dl
 import pafy
+from music import play_song
 
 
 activity = discord.Activity(type=discord.ActivityType.listening, name="BLACKPINK")
@@ -23,6 +23,7 @@ client = commands.Bot(command_prefix='Chismosa ', intents=intents, activity=acti
 load_dotenv('.env')
 my_secret = os.environ['key']
 client.remove_command('help')
+song_queue = []
 
 
 chisme_permissions = ["Shubham#2936", "Ju1899"]
@@ -34,91 +35,7 @@ async def search_song(amount, song, get_url=False):
    return [entry["webpage_url"] for entry in info["entries"]] if get_url else info
 
 def trigger_function():
-  asyncio.run(role_routine())
-def get_all_members():
-    guild = client.get_guild(862542952937029632)
-    memberList = guild.members
-    return memberList
-
-def get_member_days(member):
-    today = date.today()
-    d1 = today.strftime("%d/%m/%Y")
-    mem_join = member.joined_at
-    member_join_date = mem_join.strftime("%d/%m/%Y")
-    date0 = d1
-    date1 = member_join_date
-    day0 = int(date0[:2])
-    morep0 = date0.replace("/", "")
-    month0 = int(morep0[2:-4])
-    year0 = int(date0[6:])
-    day1 = int(date1[:2])
-    morep1 = date1.replace("/", "")
-    month1 = int(morep1[2:-4])
-    year1 = int(date1[6:])
-    date0 = date(year0, month0, day0)
-    date1 = date(year1, month1, day1)
-    delta = date0 - date1
-    return delta.days
-
-async def role_routine():
-    role_list = ["Sister.💁‍♀️", "Sister Menor.🙆‍♀️", "Hermana del Medio.💇‍♀️", "Sister Mayor.🙇‍♀️"]
-    channel = client.get_channel(862591362369191966)
-    member_list = get_all_members()
-    change_list = [[], [], [], []]
-    for member in member_list:
-        print("Checking: {}".format(member))
-        days = get_member_days(member)
-        roles = member.roles
-        role = discord.utils.get(member.guild.roles, name="Spambot 🤖")
-        role2 = discord.utils.get(member.guild.roles, name="Music Bot 🎶")
-        if role in roles or role2 in roles:
-            continue
-        if days >= 30 and days < 90:
-            new_role = discord.utils.get(member.guild.roles, name="Sister")
-            old_role = discord.utils.get(member.guild.roles, name="Hermanastra")
-            if new_role not in roles:
-                print("Granting: {} role: Sister".format(member))
-                change_list[0].append("{} is now a Sister! 💁‍♀️".format(remove_tag(str(member))))
-                await member.add_roles(new_role)
-                await member.remove_roles(old_role)
-        elif days >= 90 and days < 180:
-            new_role = discord.utils.get(member.guild.roles, name="Sister Menor")
-            old_role = discord.utils.get(member.guild.roles, name="Sister")
-            if new_role not in roles:
-                print("Granting: {} role: Sister Menor".format(member))
-                change_list[1].append("{} is now a Sister Menor! 🙆‍♀️".format(remove_tag(str(member))))
-                await member.add_roles(new_role)
-                await member.remove_roles(old_role)
-        elif days >= 180 and days < 300:
-            new_role = discord.utils.get(member.guild.roles, name="Hermana del Medio")
-            old_role = discord.utils.get(member.guild.roles, name="Sister Menor")
-            if new_role not in roles:
-                print("Granting: {} role: Hermana del Medio".format(member))
-                change_list[2].append("{} is now a Hermana del Medio! 💇‍♀️".format(remove_tag(str(member))))
-                await member.add_roles(new_role)
-                await member.remove_roles(old_role)
-        elif days >= 300:
-            new_role = discord.utils.get(member.guild.roles, name="Sister Mayor")
-            old_role = discord.utils.get(member.guild.roles, name="Hermana del Medio")
-            if new_role not in roles:
-                print("Granting: {} role: Sister Mayor".format(member))
-                change_list[3].append("{} is now a Sister Mayor! 🙇‍♀️".format(remove_tag(str(member))))
-                await member.add_roles(new_role)
-                await member.remove_roles(old_role)
-    
-    for i, lis in enumerate(change_list):
-      if len(lis) == 1:
-        await channel.send(lis[0])
-      elif len(lis) > 1:
-        names = []
-        for memb in lis:
-          names.append(memb.split(' is')[0])
-        names = ", ".join(names)
-        role_name, emoji = role_list[i].split(".")
-        await channel.send(f"{names} are now {role_name}!!!{emoji}")
-
-    channel = client.get_channel(862542970099204098)
-    await channel.send(random.choice(db["chismes"]))
+  asyncio.run(role_routine(client))
 
 @client.event
 async def on_member_join(member):
@@ -152,10 +69,10 @@ async def on_message(message):
     if message.content == "do routine":
         if str(message.author) == "JuanC#1899":
           print("im here")
-          await role_routine()
+          await role_routine(client)
 
     if message.content == "Members Count":
-        mem_list = get_all_members()
+        mem_list = get_all_members(client)
         for member in mem_list:
             print("Member: {} Days in server: {}".format(member, get_member_days(member)))
 
@@ -188,7 +105,7 @@ async def on_message(message):
         await message.channel.send("Derrama el té sister!!!:tea:")
     
     if re.match(re.compile("days all", re.I), message.content):
-        members = get_all_members()
+        members = get_all_members(client)
         names = []
         member_dict = {}
         for member in members:
@@ -199,7 +116,7 @@ async def on_message(message):
         await message.channel.send("\n".join(names))
 
     if re.match("days [a-z0-9_]+", message.content.lower()):
-        members = get_all_members()
+        members = get_all_members(client)
         username = message.content.split()[1]
         print(username)
         for member in members:
@@ -267,7 +184,7 @@ async def on_message(message):
 
     if message.content.startswith("Send patch notes"):
         embed = discord.Embed(title="Chismosa Patch Notes v1.7", description="Umghhh, I just added some permissions to some commands xd, remember to use \"Chismosa help\" if you need help with the commands.")
-        channel = client.get_channel(862542970099204098)
+        channel = client.get_channel(862591362369191966)
         await channel.send(content=None, embed=embed)
 
     if re.match(re.compile("c+h+i+s+m+o+s+a+ +i+ +l+i+k+e+ +m+e+n+", re.I), message.content):
@@ -280,10 +197,10 @@ async def on_ready():
     print("Our bot is logged in as {0.user}".format(client))
     
 @client.command(pass_context = True)
-async def play(ctx, url):
+async def play(ctx, name):
   if ctx.voice_client:
-    ctx.voice_client.stop()
-  url = ctx.message.content[14:]
+    voice = discord.utils.get(client.voice_clients, guild=ctx.guild)
+    voice.stop()
   if ctx.author.voice is None:
     await ctx.send("Gurl, join a voice channel pls.")
   channel = ctx.author.voice.channel
@@ -291,22 +208,14 @@ async def play(ctx, url):
     await channel.connect()
   else:
     await ctx.voice_client.move_to(channel)
-
-  result = await search_song(1, url, get_url=True)
+  name = ctx.message.content[14:]
+  result = await search_song(1, name, get_url=True)
   song = result[0]
+  print(name)
   print(song)
-
-  FFMPEG_OPTIONS = {'before_options': '-reconnect 1 -reconnect_streamed 1 -reconnect_delay_max 5', 'options': '-vn'}
-  YDL_OPTIONS = {'format':"bestaudio"}
-
   vc = ctx.voice_client
+  await play_song(song, ctx, vc)
 
-  with youtube_dl.YoutubeDL(YDL_OPTIONS) as ydl:
-    info = ydl.extract_info(song, download=False)
-    url2 = info['formats'][0]['url']
-    source = await discord.FFmpegOpusAudio.from_probe(url2, **FFMPEG_OPTIONS)
-    await ctx.send("Playing :woman_tipping_hand::notes: : {}".format(song))
-    vc.play(source)
 
 @client.command(pass_context = True)
 async def resume(ctx):
@@ -325,9 +234,13 @@ async def leave(ctx):
       await ctx.send("Bye girl {}".format(emoji))
       await ctx.guild.voice_client.disconnect()
 
+@client.command(pass_context=True)
+async def skip(ctx):
+  await ctx.guild.voice_client.skip()
+
 @tasks.loop(hours=24)
 async def called_once_a_day():
-    await role_routine()
+    await role_routine(client)
 
 @called_once_a_day.before_loop
 async def before():
