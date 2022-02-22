@@ -219,11 +219,23 @@ async def play(ctx, name):
 
 @client.command(pass_context = True)
 async def resume(ctx):
-    await ctx.guild.voice_client.resume()
+    voice = get(client.voice_clients, guild=ctx.guild)
+    if voice.is_paused():
+      ctx.guild.voice_client.resume()
+      emoji = '\N{DANCER}'
+      await ctx.message.add_reaction(emoji)
+    else:
+      await ctx.send("The song isn't paused sis :woman_tipping_hand:")
 
 @client.command(pass_context = True)
 async def pause(ctx):
-    await ctx.guild.voice_client.pause()
+    voice = get(client.voice_clients, guild=ctx.guild)
+    if voice.is_paused():
+      await ctx.send("Gurl, the song is *lik*, already paused :rolling_eyes:")
+      return
+    ctx.guild.voice_client.pause()
+    emoji = '\N{RAISED HAND}'
+    await ctx.message.add_reaction(emoji)
 
 @client.command(pass_context = True)
 async def leave(ctx):
