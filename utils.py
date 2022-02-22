@@ -130,4 +130,4 @@ async def role_routine(client):
         await channel.send(f"{names} are now {role_name}!!!{emoji}")
 
     channel = client.get_channel(862542970099204098)
-    # await channel.send(random.choice(db["chismes"]))
+    await channel.send(random.choice(db["chismes"]))

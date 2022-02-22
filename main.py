@@ -13,7 +13,7 @@ import random
 from discord.utils import get
 import youtube_dl
 import pafy
-from music import play_song
+from music import play_song, check_queue
 
 
 activity = discord.Activity(type=discord.ActivityType.listening, name="BLACKPINK")
@@ -23,8 +23,8 @@ client = commands.Bot(command_prefix='Chismosa ', intents=intents, activity=acti
 load_dotenv('.env')
 my_secret = os.environ['key']
 client.remove_command('help')
-song_queue = []
-
+global queues
+queues = {}
 
 chisme_permissions = ["Shubham#2936", "Ju1899"]
 
@@ -214,7 +214,7 @@ async def play(ctx, name):
   print(name)
   print(song)
   vc = ctx.voice_client
-  await play_song(song, ctx, vc)
+  await play_song(queues, song, ctx, vc)
 
 
 @client.command(pass_context = True)
@@ -246,9 +246,29 @@ async def leave(ctx):
       await ctx.send("Bye girl {}".format(emoji))
       await ctx.guild.voice_client.disconnect()
 
+@client.command(pass_context = True)
+async def queue(ctx):
+  voice = ctx.guild.voice_client
+  name = ctx.message.content[14:]
+  result = await search_song(1, name, get_url=True)
+  song = result[0]
+
+  guild_id = ctx.message.guild.id
+  if guild_id in queues:
+    queues[guild_id].append(song)
+  else:
+    queues[guild_id] = [song]
+
+  await ctx.send("Added song to the queue :woman_technologist:")
+  
+
 @client.command(pass_context=True)
 async def skip(ctx):
-  await ctx.guild.voice_client.skip()
+  if ctx.voice_client:
+    voice = discord.utils.get(client.voice_clients, guild=ctx.guild)
+    voice.stop()
+    await check_queue(queues, ctx, ctx.message.guild.id)
+    await ctx.send("Skipped song.")
 
 @tasks.loop(hours=24)
 async def called_once_a_day():
