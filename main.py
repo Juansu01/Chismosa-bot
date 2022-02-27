@@ -14,6 +14,12 @@ from discord.utils import get
 import youtube_dl
 import pafy
 from music import play_song, check_queue
+import neuralintents
+from neuralintents import GenericAssistant
+
+chatbot = GenericAssistant("intents.json")
+chatbot.train_model()
+chatbot.save_model()
 
 
 activity = discord.Activity(type=discord.ActivityType.listening, name="BLACKPINK")
@@ -25,6 +31,7 @@ my_secret = os.environ['key']
 client.remove_command('help')
 global queues
 queues = {}
+players = {}
 
 chisme_permissions = ["Shubham#2936", "Ju1899"]
 
@@ -47,6 +54,10 @@ async def on_message(message):
 
     if message.author == client.user:
         return
+
+    if message.content.startswith("Gos "):
+        response = chatbot.request(message.content[4:])
+        await message.channel.send(response)
 
     if message.content == "Chismosa help":
         embed = discord.Embed(title="Help with La Chismosa", description="List of Chismosa commands:")
@@ -208,14 +219,19 @@ async def play(ctx, name):
     await channel.connect()
   else:
     await ctx.voice_client.move_to(channel)
-  name = ctx.message.content[14:]
-  result = await search_song(1, name, get_url=True)
-  song = result[0]
+  
+  if "youtube.com" in ctx.message.content or "youtu.be" in ctx.message.content:
+    print("yt url")
+    song = ctx.message.content[14:]
+  else:
+    print("Not a yt url")
+    name = ctx.message.content[14:]
+    result = await search_song(1, name, get_url=True)
+    song = result[0]
   print(name)
   print(song)
   vc = ctx.voice_client
   await play_song(queues, song, ctx, vc)
-
 
 @client.command(pass_context = True)
 async def resume(ctx):

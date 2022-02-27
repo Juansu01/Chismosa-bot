@@ -6,16 +6,11 @@ FFMPEG_OPTIONS = {'before_options': '-reconnect 1 -reconnect_streamed 1 -reconne
 YDL_OPTIONS = {'format':"bestaudio"}
 
 async def check_queue(queues, ctx, id):
-  if queues[id] != []:
+  if queues.get(id) != None:
     song = queues[id].pop(0)
     vc = ctx.guild.voice_client
     print(song)
-    with youtube_dl.YoutubeDL(YDL_OPTIONS) as ydl:
-      info = ydl.extract_info(song, download=False)
-      url2 = info['formats'][0]['url']
-      source = await discord.FFmpegOpusAudio.from_probe(url2, **FFMPEG_OPTIONS)
-      await ctx.send("Playing :woman_tipping_hand::notes: : {}".format(song))
-      vc.play(source, after=lambda x=None: asyncio.run(check_queue(queues, ctx, ctx.message.guild.id)))
+    await play_song(queues, song, ctx, vc)
 
 async def play_song(queues, song, ctx, vc):
   with youtube_dl.YoutubeDL(YDL_OPTIONS) as ydl:
@@ -23,4 +18,4 @@ async def play_song(queues, song, ctx, vc):
     url2 = info['formats'][0]['url']
     source = await discord.FFmpegOpusAudio.from_probe(url2, **FFMPEG_OPTIONS)
     await ctx.send("Playing :woman_tipping_hand::notes: : {}".format(song))
-    vc.play(source, after=lambda x=None: asyncio.run(check_queue(queues, ctx, ctx.message.guild.id)))
+    vc.play(source, after=lambda x=None: check_queue(queues, ctx, ctx.message.guild.id))
