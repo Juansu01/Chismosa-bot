@@ -14,12 +14,6 @@ from discord.utils import get
 import youtube_dl
 import pafy
 from music import play_song, check_queue
-import neuralintents
-from neuralintents import GenericAssistant
-
-chatbot = GenericAssistant("intents.json")
-chatbot.train_model()
-chatbot.save_model()
 
 
 activity = discord.Activity(type=discord.ActivityType.listening, name="BLACKPINK")
@@ -56,6 +50,7 @@ async def on_message(message):
         return
 
     if message.content.startswith("Gos "):
+        pass
         response = chatbot.request(message.content[4:])
         await message.channel.send(response)
 
