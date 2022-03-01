@@ -1,8 +1,8 @@
 {"intents":[
-  {tag: "greetings",
+  {"tag": "greetings",
    "patterns": ["Hi", "Hello", "What's up?", "Suh dude", "Hi girl", "Hey", "Good Day"],
    "responses": ["Hey gurl!", "Omg, hii", "Heyy, what's good", "Hi dad", "Hola jermana!", "Hi sister!"]},
-  {tag: "status",
+  {"tag": "status",
    "patterns": ["How are you?", "How's it going?", "How do you feel?", "How have you been?"],
    "responses": ["I literally feel so good today, like, omg!!!", "Girl, I feel so happy cuz like, I've been listening to BLACKPINK all day", "I'm literally craving some chismes rn", "I woke up feeling like a real bad bitch today, like I usually do"]}
 ] 
