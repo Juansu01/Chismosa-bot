@@ -6,7 +6,7 @@ This is the repo for my Discord bot that I code for fun. The bot is full of inte
 
 ### About Chismosa ℹ️
 
-<p>Chismosa was created mainly for handling roles for the members of our server, but over time, we decided it would me nice to allow the bot to store and send what we call "chismes" which is Spanish for "Gossip", we tought it was a good idea for keeping the members engaged. We wanted the bot to have a personality, so there are plenty of commands or messages that can be triggered by specific words found in our member's messages.</p>
+<p>Chismosa was created mainly for handling roles for the members of our server, but over time, we decided it would be nice to allow the bot to store and send what we call "chismes" which is Spanish for "Gossip", we tought it was a good idea for keeping the members engaged. We wanted the bot to have a personality, so there are plenty of commands or messages that can be triggered by specific words found in our member's messages.</p>
 
 <p>Chismosa consumes the senquoute API, does a role routine every 24 hours or everytime the server restarts, sends random chismes to the general channel, is able to count the days of each member, and uses a machine learning model for language processing wich allows the bot to reply to messages similar to what a human would say. </p>
 
