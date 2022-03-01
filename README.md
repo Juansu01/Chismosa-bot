@@ -38,7 +38,7 @@ I mainly use this bot for practice, this is a list of the different libraries I 
 | My Days | None | Chismosa will send you the days you have in our server.
 | Chismosa play | Song name | Chismosa will join the voice channel you're in, search for the song, and play it for you. |
 | Chismosa pause | None | Chismosa will pause the song. |
-| Chismosa resume | None | Chismosa will resume the song she was previosly playing |
+| Chismosa resume | None | Chismosa will resume the song she was previously playing. |
 
 ---
 
