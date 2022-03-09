@@ -2,9 +2,8 @@ import discord
 import nacl
 import os
 from discord.ext import commands
-from dotenv import load_dotenv
 import re
-from utils import *
+from funcs import *
 import asyncio
 from discord.ext import tasks
 from replit import db
@@ -13,21 +12,20 @@ import random
 from discord.utils import get
 import youtube_dl
 from music import play_song, check_queue
-from neuralintents import GenericAssistant
-import nltk
+
+
 
 #Setting up chatbot
 
-nltk.download("omw-1.4")
-chatbot = GenericAssistant("intents.json")
-chatbot.load_model("assistant_model")
+#nltk.download("omw-1.4")
+#chatbot = GenericAssistant("intents.json")
+#chatbot.load_model("assistant_model")
 
 
 activity = discord.Activity(type=discord.ActivityType.listening, name="BLACKPINK")
 intents = discord.Intents.default()
 intents.members = True
 client = commands.Bot(command_prefix='Chismosa ', intents=intents, activity=activity)
-load_dotenv('.env')
 my_secret = os.environ['key']
 client.remove_command('help')
 global queues
@@ -57,6 +55,7 @@ async def on_message(message):
         return
 
     if message.content.startswith("Gos "):
+        return
         response = chatbot.request(message.content[4:])
         await message.channel.send(response)
 

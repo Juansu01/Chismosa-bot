@@ -1,1 +1,1 @@
-run = "pip install neuralintents ; pip install pynacl ; python src/main.py"
+run = "python src/main.py"
