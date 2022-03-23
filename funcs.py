@@ -5,7 +5,25 @@ import discord
 from discord.utils import get
 import random
 from datetime import date
+import DiscordUtils
 
+def divide_chunks(l, n):
+    for i in range(0, len(l), n): 
+        yield l[i:i + n]
+
+
+async def send_day_list(ctx, member_list):
+    lis = list(divide_chunks(member_list, 15))
+    embeds = []
+    print(lis)
+    for i, arr in enumerate(lis):
+        embeds.append(discord.Embed(color=ctx.author.color).add_field(name=f"Page {i + 1}", value="\n".join(arr)))
+    paginator = DiscordUtils.Pagination.CustomEmbedPaginator(ctx)
+    paginator.add_reaction('⏮️', "first")
+    paginator.add_reaction('⏪', "back")
+    paginator.add_reaction('⏩', "next")
+    paginator.add_reaction('⏭️', "last")
+    await paginator.run(embeds)
 
 def get_all_members(client):
     guild = client.get_guild(862542952937029632)

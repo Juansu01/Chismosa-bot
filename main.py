@@ -53,7 +53,8 @@ async def on_message(message):
 
     if message.author == client.user:
         return
-
+    if message.content == "test":
+        pass
     if message.content.startswith("Gos "):
         return
         response = chatbot.request(message.content[4:])
@@ -66,7 +67,7 @@ async def on_message(message):
         embed.add_field(name="Days All", value="Displays a list of all members showing the days they have been on the server.")
         embed.add_field(name="Days <username>", value="La Chismosa will tell you the days this user has.")
         embed.add_field(name="My Days", value="La Chismosa will tell you your days.")
-        embed.add_field(name="Members Count", value="Counts current members, including bots, 'cus bots are also sisterss.")
+        embed.add_field(name="Count our sisters", value="Counts current members")
         embed.add_field(name="New Chisme <chisme>", value="Add a new chisme.")
         embed.add_field(name="Del Chisme <number>", value="Deletes a chisme, number is the positon of the chisme in the current chisme list.")
         embed.add_field(name="List Chismes", value="Shows all the chismes that La Chismosa is currently holding.")
@@ -116,6 +117,7 @@ async def on_message(message):
         await message.channel.send("Derrama el té sister!!!:tea:")
     
     if re.match(re.compile("days all", re.I), message.content):
+        ctx = await client.get_context(message)
         members = get_all_members(client)
         names = []
         member_dict = {}
@@ -124,7 +126,8 @@ async def on_message(message):
         sorted_member_dict = sorted(member_dict.items(), key=lambda x: x[1], reverse=True)
         for item in sorted_member_dict:  
             names.append("@{}: {} days".format(item[0], item[1]))
-        await message.channel.send("\n".join(names))
+        await send_day_list(ctx, names)
+       
 
     if re.match("days [a-z0-9_]+", message.content.lower()):
         members = get_all_members(client)
@@ -158,8 +161,11 @@ async def on_message(message):
           await message.channel.send("I literally LOVE :woman_gesturing_ok:")
 
     if message.content == "Count our sisters":
-        members = get_all_members()
+        members = get_all_members(client)
         count = len(members)
+        for member in members:
+          if member.bot:
+            count -= 1
         await message.channel.send("We currently have {} sisters :woman_technologist: ".format(count))
 
     if message.content.startswith("New Chisme"):
