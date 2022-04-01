@@ -12,14 +12,7 @@ import random
 from discord.utils import get
 import youtube_dl
 from music import play_song, check_queue
-
-
-
-#Setting up chatbot
-
-#nltk.download("omw-1.4")
-#chatbot = GenericAssistant("intents.json")
-#chatbot.load_model("assistant_model")
+import openai
 
 
 activity = discord.Activity(type=discord.ActivityType.listening, name="BLACKPINK")
@@ -56,10 +49,19 @@ async def on_message(message):
     if message.content == "test":
         pass
     if message.content.startswith("Gos "):
-        return
-        response = chatbot.request(message.content[4:])
-        await message.channel.send(response)
-
+        openai.api_key = os.environ['openai_token']
+        response = openai.Completion.create(
+            engine="text-davinci-002",
+            prompt=message.content[4:],
+            temperature=0.1,
+            max_tokens=1000,
+            frequency_penalty=0,
+            presence_penalty=0,
+            top_p=0
+        )
+        await message.channel.send(response.choices[0].text)
+      
+        
     if message.content == "Chismosa help":
         embed = discord.Embed(title="Help with La Chismosa", description="List of Chismosa commands:")
         embed.add_field(name="Chismosa I'm depressed", value="Use this command to get an inspiring message from Jaime Carlos.")
