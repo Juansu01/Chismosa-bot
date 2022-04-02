@@ -1,1 +1,1 @@
-run = "python main.py"
+run = "python migrate.py"
