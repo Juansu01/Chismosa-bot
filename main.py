@@ -1,37 +1,35 @@
 import discord
 import nacl
 import os
+from dotenv import load_dotenv
 from discord.ext import commands
 import re
 from funcs import *
 import asyncio
 from discord.ext import tasks
-from replit import db
-from keep_alive import keep_alive
 import random
 from discord.utils import get
 import youtube_dl
-from music import play_song, check_queue
+from music import play_song, check_queue, search_song
 import openai
+from musc import Music
 
-
+music = Music()
 activity = discord.Activity(type=discord.ActivityType.listening, name="BLACKPINK")
 intents = discord.Intents.default()
 intents.members = True
 client = commands.Bot(command_prefix='Chismosa ', intents=intents, activity=activity)
-my_secret = os.environ['key']
+load_dotenv()
+my_secret = os.getenv('key')
+openai_token = os.getenv('openai_token')
 client.remove_command('help')
-global queues
-queues = {}
+queue = []
+songs = []
 players = {}
 
-chisme_permissions = ["Shubham#2936", "Ju1899"]
+chisme_permissions = ["Shubham#2936", "JuanC#1899"]
 
-async def search_song(amount, song, get_url=False):
-   info = await client.loop.run_in_executor(None, lambda: youtube_dl.YoutubeDL({"format" : "bestaudio", "quiet" : True}).extract_info(f"ytsearch{amount}:{song}", download=False, ie_key="YoutubeSearch"))
 
-   if len(info["entries"]) == 0: return None
-   return [entry["webpage_url"] for entry in info["entries"]] if get_url else info
 
 def trigger_function():
   asyncio.run(role_routine(client))
@@ -46,10 +44,12 @@ async def on_message(message):
 
     if message.author == client.user:
         return
-    if message.content == "test":
-        pass
+    if message.content.startswith("test "):
+      print("OMG IM HEREE")
+      channel = client.get_channel(862591362369191966)
+      await channel.send(message.content[5:])
     if message.content.startswith("Gos "):
-        openai.api_key = os.environ['openai_token']
+        openai.api_key = openai_token
         response = openai.Completion.create(
             engine="text-davinci-002",
             prompt=message.content[4:],
@@ -94,12 +94,9 @@ async def on_message(message):
       if str(message.author) not in chisme_permissions:
             await message.channel.send("Gurl, you're liek, not allowed to do that :face_with_hand_over_mouth:")
             return
-      chisme_list = list(db["chismes"])
-      tuple_list = []
-      for (i, item) in enumerate(chisme_list , start=1):
-          tuple_list.append("({}) {}".format(i, item))
-      for i in range(0, len(tuple_list), 3):
-        await message.channel.send("\n".join(tuple_list[i:i + 3]))
+      chisme_list = divide_chunks(get_all_chismes(), 3)
+      for chismes in chisme_list:
+        await message.channel.send("\n".join(chismes))
 
 
     if re.match(re.compile("(Chismosa|chismosa) (I’m|I'm) (depressed)", re.I), message.content):
@@ -111,7 +108,7 @@ async def on_message(message):
 
     if message.content.lower() == 'chisme':
         try:
-            await message.channel.send(random.choice(db["chismes"]))
+            await message.channel.send(get_random_chisme())
         except:
             await message.channel.send("We don't have any chismes yet")
 
@@ -182,15 +179,13 @@ async def on_message(message):
         if str(message.author) not in chisme_permissions:
               await message.channel.send("Gurl, you're liek, not allowed to do that :face_with_hand_over_mouth:")
               return
-        if 'chismes' in db.keys():
-            index = int(message.content.split('Del Chisme ',1)[1])
-            index = index - 1
-            print(index)
-            res = delete_chisme(index)
-            if res == True:
-                await message.channel.send("Ugh I hated that Chisme, it's gone now :face_gun_smiling:")
-            else:
-                await message.channel.send("Hermanaa, we don't have that many chismes :pinching_hand:")
+        index = int(message.content.split('Del Chisme ',1)[1])
+        if index > len(get_all_chismes()):
+            await message.channel.send("Hermanaa, we don't have that many chismes :pinching_hand:")
+            return
+        delete_chisme(index)
+        await message.channel.send("Ugh I hated that Chisme, it's gone now :face_gun_smiling:")
+
         
     if "men" in str(message.content.lower()):
         if "women" in str(message.content.lower()) or "Women" in str(message.content):
@@ -217,9 +212,15 @@ async def on_ready():
     
 @client.command(pass_context = True)
 async def play(ctx, name):
-  if ctx.voice_client:
-    voice = discord.utils.get(client.voice_clients, guild=ctx.guild)
-    voice.stop()
+  if "youtube.com" in ctx.message.content or "youtu.be" in ctx.message.content:
+    print("yt url")
+    url = ctx.message.content[14:]
+  else:
+    print("Not a yt url")
+    name = ctx.message.content[14:]
+    result = await search_song(client, 1, name, True)
+    url = result[0]
+  
   if ctx.author.voice is None:
     await ctx.send("Gurl, join a voice channel pls.")
   channel = ctx.author.voice.channel
@@ -228,18 +229,17 @@ async def play(ctx, name):
   else:
     await ctx.voice_client.move_to(channel)
   
-  if "youtube.com" in ctx.message.content or "youtu.be" in ctx.message.content:
-    print("yt url")
-    song = ctx.message.content[14:]
+  player = music.get_player(guild_id=ctx.guild.id)
+  if not player:
+    player = music.create_player(ctx, ffmpeg_error_betterfix=True)
+  if not ctx.voice_client.is_playing():
+    await player.queue(url, search=True)
+    song = await player.play()
+    await ctx.send(f"Playing {song.name}")
   else:
-    print("Not a yt url")
-    name = ctx.message.content[14:]
-    result = await search_song(1, name, get_url=True)
-    song = result[0]
-  print(name)
-  print(song)
-  vc = ctx.voice_client
-  await play_song(queues, song, ctx, vc)
+    song = await player.queue(url, search=True)
+    await ctx.send(f"Queued {song.name}")
+
 
 @client.command(pass_context = True)
 async def resume(ctx):
@@ -304,5 +304,4 @@ async def before():
     print("Finished waiting")
 called_once_a_day.start()
 
-keep_alive()
 client.run(my_secret)

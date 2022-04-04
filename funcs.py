@@ -1,11 +1,14 @@
 import requests
 import json
-from replit import db
 import discord
 from discord.utils import get
 import random
 from datetime import date
 import DiscordUtils
+from sqlalchemy.orm import Session
+from chismes import Chismes, engine
+import random
+
 
 def divide_chunks(l, n):
     for i in range(0, len(l), n): 
@@ -66,28 +69,35 @@ def get_quote():
     quote = json_data[0]['q'] + " -James Charles"
     return(quote)
 
-def get_chisme():
-    chisme = requests.get('https://jasonpersonaldomain.com/chismosabot/random')
-    json_data = json.loads(chisme.text)
-    quote = json_data['quote']['quote']
-    return quote
+
+def get_random_chisme():
+    with Session(engine) as session:
+        chismes = session.query(Chismes).all()
+        chisme = random.choice(chismes)
+        return chisme.__dict__.get('content')
+
+
+def get_all_chismes():
+    chisme_list = []
+    with Session(engine) as session:
+        chismes = session.query(Chismes).all()
+    for chisme in chismes:
+        chis_to_dict = chisme.__dict__
+        chisme_list.append(f"id:{chis_to_dict.get('id')} chisme: {chis_to_dict.get('content')}")
+    return chisme_list
+
 
 def update_chismes(chisme):
-    if "chismes" in db.keys():
-        chismes = list(db["chismes"])
-        chismes.append(chisme)
-        db["chismes"] = chismes
-    else:
-        db["chismes"] = chisme
+    with Session(engine) as session:
+        new_chisme = Chismes(content=chisme)
+        session.add(new_chisme)
+        session.commit()
 
 def delete_chisme(index):
-    chismes = db["chismes"]
-    if len(chismes) > index:
-        del chismes[index]
-        db["chismes"] = chismes
-        return True
-    else:
-        return False
+    with Session(engine) as session:
+        chisme = session.get(Chismes, index)
+        session.delete(chisme)
+        session.commit()
 
 async def role_routine(client):
     role_list = ["Sister.💁‍♀️", "Sister Menor.🙆‍♀️", "Hermana del Medio.💇‍♀️", "Sister Mayor.🙇‍♀️"]
@@ -148,4 +158,4 @@ async def role_routine(client):
         await channel.send(f"{names} are now {role_name}!!!{emoji}")
 
     channel = client.get_channel(862542970099204098)
-    await channel.send(random.choice(db["chismes"]))
+    await channel.send(get_random_chisme())
