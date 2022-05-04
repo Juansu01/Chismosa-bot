@@ -277,7 +277,7 @@ async def pause(ctx):
 @client.command(pass_context = True)
 async def leave(ctx):
 	if ctx.voice_client is None:
-		  await ctx.send("I'm not even connected to a voice channel, *liek* wtfff :rolling_eyes:")
+		await ctx.send("I'm not even connected to a voice channel, *liek* wtfff :rolling_eyes:")
 	else:
 		player = music.get_player(guild_id=ctx.guild.id)
 		if player:
