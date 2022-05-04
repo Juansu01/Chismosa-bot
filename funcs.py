@@ -1,13 +1,19 @@
 import requests
 import json
 import discord
+from discord.ext import tasks
 from discord.utils import get
 import random
 from datetime import date
 import DiscordUtils
 from sqlalchemy.orm import Session
-from chismes import Chismes, engine
-import random
+from sqlalchemy import create_engine
+from chismes import Chismes
+
+user = "chismosa_dev"
+passw = "chismosa_dev_pwd"
+host = "localhost"
+db = "chismosa_dev_db"
 
 
 def divide_chunks(l, n):
@@ -71,6 +77,7 @@ def get_quote():
 
 
 def get_random_chisme():
+    engine = create_engine('mysql+mysqldb://{}:{}@{}/{}'.format(user, passw, host, db), pool_size=20, max_overflow=0, pool_pre_ping=True)
     with Session(engine) as session:
         chismes = session.query(Chismes).all()
         chisme = random.choice(chismes)
@@ -78,6 +85,7 @@ def get_random_chisme():
 
 
 def get_all_chismes():
+    engine = create_engine('mysql+mysqldb://{}:{}@{}/{}'.format(user, passw, host, db), pool_size=20, max_overflow=0, pool_pre_ping=True)
     chisme_list = []
     with Session(engine) as session:
         chismes = session.query(Chismes).all()
@@ -88,16 +96,22 @@ def get_all_chismes():
 
 
 def update_chismes(chisme):
+    engine = create_engine('mysql+mysqldb://{}:{}@{}/{}'.format(user, passw, host, db), pool_size=20, max_overflow=0, pool_pre_ping=True)
     with Session(engine) as session:
         new_chisme = Chismes(content=chisme)
         session.add(new_chisme)
         session.commit()
 
 def delete_chisme(index):
+    engine = create_engine('mysql+mysqldb://{}:{}@{}/{}'.format(user, passw, host, db), pool_size=20, max_overflow=0, pool_pre_ping=True)
     with Session(engine) as session:
         chisme = session.get(Chismes, index)
-        session.delete(chisme)
-        session.commit()
+        if chisme:
+            session.delete(chisme)
+            session.commit()
+            return True
+    return False
+
 
 async def role_routine(client):
     role_list = ["Sister.💁‍♀️", "Sister Menor.🙆‍♀️", "Hermana del Medio.💇‍♀️", "Sister Mayor.🙇‍♀️"]
@@ -147,15 +161,12 @@ async def role_routine(client):
                 await member.remove_roles(old_role)
     
     for i, lis in enumerate(change_list):
-      if len(lis) == 1:
-        await channel.send(lis[0])
-      elif len(lis) > 1:
-        names = []
-        for memb in lis:
-          names.append(memb.split(' is')[0])
-        names = ", ".join(names)
-        role_name, emoji = role_list[i].split(".")
-        await channel.send(f"{names} are now {role_name}!!!{emoji}")
-
-    channel = client.get_channel(862542970099204098)
-    await channel.send(get_random_chisme())
+        if len(lis) == 1:
+            await channel.send(lis[0])
+        elif len(lis) > 1:
+            names = []
+            for memb in lis:
+                names.append(memb.split(' is')[0])
+            names = ", ".join(names)
+            role_name, emoji = role_list[i].split(".")
+            await channel.send(f"{names} are now {role_name}!!!{emoji}")
