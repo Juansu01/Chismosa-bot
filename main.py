@@ -103,11 +103,7 @@ async def on_message(message):
         await message.channel.send("Oula jermana, ya compraste tu paleta de James Charles hoy?:sunglasses:")
 
     if message.content.lower() == 'chisme':
-        while True:
-            chisme = get_random_chisme()
-            if chisme:
-                await message.channel.send(get_random_chisme())
-                return
+        await message.channel.send(get_random_chisme())
 
     if re.match(re.compile("chismosa (te|té)", re.I), message.content):
         await message.channel.send("Derrama el té sister!!!:tea:")
@@ -296,14 +292,10 @@ async def skip(ctx):
     else:
         await ctx.send(f"Skipped {data[0].name}")
 
-@tasks.loop(hours=12)
+@tasks.loop(hours=36)
 async def called_once_a_day():
     channel = client.get_channel(862542970099204098)
-    chisme = random.choice(all_chismes)
-    chisme = chisme.split()
-    chisme.pop(0)
-    chisme.pop(0)
-    await channel.send(" ".join(chisme))
+    await channel.send(get_random_chisme())
     await role_routine(client)
 
 @called_once_a_day.before_loop
