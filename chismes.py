@@ -2,6 +2,7 @@ from sqlalchemy import create_engine
 from sqlalchemy import Column, Integer, String
 from sqlalchemy.orm import declarative_base
 from sqlalchemy.orm import Session
+import youtube_dl
 
 user = "chismosa_dev"
 passw = "chismosa_dev_pwd"
@@ -15,3 +16,8 @@ class Chismes(Base):
     id = Column(Integer, primary_key=True)
     content = Column(String(700))
 
+async def search_song(client, amount, song, get_url=False):
+   info = await client.loop.run_in_executor(None, lambda: youtube_dl.YoutubeDL({"format" : "bestaudio", "quiet" : True}).extract_info(f"ytsearch{amount}:{song}", download=False, ie_key="YoutubeSearch"))
+
+   if len(info["entries"]) == 0: return None
+   return [entry["webpage_url"] for entry in info["entries"]] if get_url else info

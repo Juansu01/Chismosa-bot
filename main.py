@@ -10,9 +10,9 @@ from discord.ext import tasks
 import random
 from discord.utils import get
 import youtube_dl
-from music import play_song, check_queue, search_song
 import openai
 from musc import Music
+from chismes import search_song
 
 music = Music()
 activity = discord.Activity(type=discord.ActivityType.listening, name="BLACKPINK")
@@ -289,14 +289,15 @@ async def skip(ctx):
     data = await player.skip(force=True)
     if len(data) == 2:
         await ctx.send(f"Skipped from {data[0].name} to {data[1].name}")
+        print(data[1])
     else:
         await ctx.send(f"Skipped {data[0].name}")
 
 @tasks.loop(hours=36)
 async def called_once_a_day():
     channel = client.get_channel(862542970099204098)
-    await channel.send(get_random_chisme())
-    await role_routine(client)
+    #await channel.send(get_random_chisme())
+    #await role_routine(client)
 
 @called_once_a_day.before_loop
 async def before():
