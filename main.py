@@ -1,22 +1,21 @@
-import discord
-import nacl
-import os
-from dotenv import load_dotenv
-from discord.ext import commands
-import re
-from funcs import *
 import asyncio
-from discord.ext import tasks
+import os
 import random
-from discord.utils import get
-import youtube_dl
+import re
+
 import openai
-from musc import Music
+from discord.ext import commands
+from discord.ext import tasks
+from discord.utils import get
+from dotenv import load_dotenv
+
 from chismes import search_song
+from funcs import *
+from musc import Music
 
 music = Music()
 activity = discord.Activity(type=discord.ActivityType.listening, name="BLACKPINK")
-intents = discord.Intents.default()
+intents = discord.Intents.all()
 intents.members = True
 client = commands.Bot(command_prefix='Chismosa ', intents=intents, activity=activity)
 load_dotenv()
@@ -28,22 +27,22 @@ all_chismes = get_all_chismes()
 
 
 def trigger_function():
-      asyncio.run(role_routine(client))
+    asyncio.run(role_routine(client))
+
 
 @client.event
 async def on_member_join(member):
     new_role = discord.utils.get(member.guild.roles, name="Hermanastra")
     await member.add_roles(new_role)
 
+
 @client.event
 async def on_message(message):
-
     if message.author == client.user:
         return
     if message.content.startswith("test "):
-          print("OMG IM HEREE")
-          channel = client.get_channel(862591362369191966)
-          await channel.send(message.content[5:])
+        channel = client.get_channel(862591362369191966)
+        await channel.send(message.content[5:])
     if message.content.startswith("Gos "):
         openai.api_key = openai_token
         response = openai.Completion.create(
@@ -56,18 +55,20 @@ async def on_message(message):
             top_p=0
         )
         await message.channel.send(response.choices[0].text)
-      
-        
+
     if message.content == "Chismosa help":
         embed = discord.Embed(title="Help with La Chismosa", description="List of Chismosa commands:")
-        embed.add_field(name="Chismosa I'm depressed", value="Use this command to get an inspiring message from Jaime Carlos.")
+        embed.add_field(name="Chismosa I'm depressed",
+                        value="Use this command to get an inspiring message from Jaime Carlos.")
         embed.add_field(name="Chisme", value="Get a chisme from La Chismosa.")
-        embed.add_field(name="Days All", value="Displays a list of all members showing the days they have been on the server.")
+        embed.add_field(name="Days All",
+                        value="Displays a list of all members showing the days they have been on the server.")
         embed.add_field(name="Days <username>", value="La Chismosa will tell you the days this user has.")
         embed.add_field(name="My Days", value="La Chismosa will tell you your days.")
         embed.add_field(name="Count our sisters", value="Counts current members")
         embed.add_field(name="New Chisme <chisme>", value="Add a new chisme.")
-        embed.add_field(name="Del Chisme <number>", value="Deletes a chisme, number is the positon of the chisme in the current chisme list.")
+        embed.add_field(name="Del Chisme <number>",
+                        value="Deletes a chisme, number is the positon of the chisme in the current chisme list.")
         embed.add_field(name="List Chismes", value="Shows all the chismes that La Chismosa is currently holding.")
         embed.add_field(name="Patch notes", value="La Chismosa will send you a message with her latest change.")
         embed.add_field(name="Chismosa play <song>", value="La Chismosa will search for the song and play it.")
@@ -94,7 +95,6 @@ async def on_message(message):
         for chismes in chisme_list:
             await message.channel.send("\n".join(chismes))
 
-
     if re.match(re.compile("(Chismosa|chismosa) (I’m|I'm) (depressed)", re.I), message.content):
         quote = get_quote()
         await message.channel.send(quote)
@@ -107,7 +107,7 @@ async def on_message(message):
 
     if re.match(re.compile("chismosa (te|té)", re.I), message.content):
         await message.channel.send("Derrama el té sister!!!:tea:")
-    
+
     if re.match(re.compile("days all", re.I), message.content):
         ctx = await client.get_context(message)
         members = get_all_members(client)
@@ -116,10 +116,9 @@ async def on_message(message):
         for member in members:
             member_dict[remove_tag(str(member))] = get_member_days(member)
         sorted_member_dict = sorted(member_dict.items(), key=lambda x: x[1], reverse=True)
-        for item in sorted_member_dict:  
+        for item in sorted_member_dict:
             names.append("@{}: {} days".format(item[0], item[1]))
         await send_day_list(ctx, names)
-       
 
     if re.match("days [a-z0-9_]+", message.content.lower()):
         members = get_all_members(client)
@@ -128,15 +127,18 @@ async def on_message(message):
         for member in members:
             if remove_tag(str(member)).lower() == username.lower():
                 print(member, username)
-                await message.channel.send("@{} has been in the server for {} days!".format(remove_tag(str(member)), get_member_days(member)))
+                await message.channel.send(
+                    "@{} has been in the server for {} days!".format(remove_tag(str(member)), get_member_days(member)))
 
     if re.match(re.compile("my days", re.I), message.content):
-        await message.channel.send("@{} has been in the server for {} days!".format(remove_tag(str(message.author)), get_member_days(message.author)))
+        await message.channel.send("@{} has been in the server for {} days!".format(remove_tag(str(message.author)),
+                                                                                    get_member_days(message.author)))
 
     if re.match(re.compile("chismosa no hablo ingl(é|e)s", re.I), message.content):
         await message.channel.send("Omg, tienes que descargar Duolingou :mobile_phone:")
 
-    if re.search(re.compile("(p+u+t+a+|p+u+t+o+|f+u+c+k+|f+a+g+o*t*|s+h+i+t+|b+i+t+c+h+|c+u+n+t+)", re.I), message.content):
+    if re.search(re.compile("(p+u+t+a+|p+u+t+o+|f+u+c+k+|f+a+g+o*t*|s+h+i+t+|b+i+t+c+h+|c+u+n+t+)", re.I),
+                 message.content):
         await message.channel.send("Watch your language sister!:nail_care:")
 
     if re.search(re.compile("s+h+o+(pp)+i+n+g+", re.I), message.content):
@@ -144,7 +146,7 @@ async def on_message(message):
 
     if re.match(re.compile("s+e+n+d+ n+u+d+e+s+", re.I), message.content):
         await message.channel.send("At least take me to dinner first!:flushed:")
-    
+
     if re.search(re.compile("(l+i+k+e+|l+o+v+e+)", re.I), message.content):
         n = random.randint(0, 1)
         if n == 0:
@@ -172,14 +174,13 @@ async def on_message(message):
         if str(message.author) not in chisme_permissions:
             await message.channel.send("Gurl, you're liek, not allowed to do that :face_with_hand_over_mouth:")
             return
-        index = int(message.content.split('Del Chisme ',1)[1])
+        index = int(message.content.split('Del Chisme ', 1)[1])
         deleted = delete_chisme(index)
         if deleted:
             await message.channel.send("Ugh I hated that Chisme, it's gone now :face_gun_smiling:")
         else:
             await message.channel.send("Hermanaa, you just gave me a wrong id, estás bien?? :rolling_eyes: ")
 
-        
     if "men" in str(message.content.lower()):
         if "women" in str(message.content.lower()) or "Women" in str(message.content):
             return
@@ -190,7 +191,8 @@ async def on_message(message):
         await message.channel.send("Está bem, você não sai daí :nail_care::flag_br:")
 
     if message.content.startswith("Send patch notes"):
-        embed = discord.Embed(title="Chismosa Patch Notes v1.7", description="Umghhh, I just added some permissions to some commands xd, remember to use \"Chismosa help\" if you need help with the commands.")
+        embed = discord.Embed(title="Chismosa Patch Notes v1.7",
+                              description="Umghhh, I just added some permissions to some commands xd, remember to use \"Chismosa help\" if you need help with the commands.")
         channel = client.get_channel(862591362369191966)
         await channel.send(content=None, embed=embed)
 
@@ -199,9 +201,11 @@ async def on_message(message):
 
     await client.process_commands(message)
 
+
 @client.event
 async def on_ready():
     print("Our bot is logged in as {0.user}".format(client))
+
 
 @client.event
 async def on_voice_state_update(member, before, after):
@@ -216,9 +220,9 @@ async def on_voice_state_update(member, before, after):
         await channel.send("Not you guys leaving me alone :sob::sob::sob:")
         await channel.send("Anyway, bye :rolling_eyes:")
         await voice_client.disconnect()
-    
 
-@client.command(pass_context = True)
+
+@client.command(pass_context=True)
 async def play(ctx, name):
     if "youtube.com" in ctx.message.content or "youtu.be" in ctx.message.content:
         print("yt url")
@@ -228,7 +232,7 @@ async def play(ctx, name):
         name = ctx.message.content[14:]
         result = await search_song(client, 1, name, True)
         url = result[0]
-  
+
     if ctx.author.voice is None:
         await ctx.send("Gurl, join a voice channel pls.")
         return
@@ -237,7 +241,7 @@ async def play(ctx, name):
         await channel.connect()
     else:
         await ctx.voice_client.move_to(channel)
-  
+
     player = music.get_player(guild_id=ctx.guild.id)
     if not player:
         player = music.create_player(ctx, ffmpeg_error_betterfix=True)
@@ -250,27 +254,29 @@ async def play(ctx, name):
         await ctx.send(f"Queued {song.name}")
 
 
-@client.command(pass_context = True)
+@client.command(pass_context=True)
 async def resume(ctx):
     voice = get(client.voice_clients, guild=ctx.guild)
     if voice.is_paused():
-          ctx.guild.voice_client.resume()
-          emoji = '\N{DANCER}'
-          await ctx.message.add_reaction(emoji)
+        ctx.guild.voice_client.resume()
+        emoji = '\N{DANCER}'
+        await ctx.message.add_reaction(emoji)
     else:
-          await ctx.send("The song isn't paused sis :woman_tipping_hand:")
+        await ctx.send("The song isn't paused sis :woman_tipping_hand:")
 
-@client.command(pass_context = True)
+
+@client.command(pass_context=True)
 async def pause(ctx):
     voice = get(client.voice_clients, guild=ctx.guild)
     if voice.is_paused():
-          await ctx.send("Gurl, the song is *lik*, already paused :rolling_eyes:")
-          return
+        await ctx.send("Gurl, the song is *lik*, already paused :rolling_eyes:")
+        return
     ctx.guild.voice_client.pause()
     emoji = '\N{RAISED HAND}'
     await ctx.message.add_reaction(emoji)
 
-@client.command(pass_context = True)
+
+@client.command(pass_context=True)
 async def leave(ctx):
     if ctx.voice_client is None:
         await ctx.send("I'm not even connected to a voice channel, *liek* wtfff :rolling_eyes:")
@@ -293,16 +299,18 @@ async def skip(ctx):
     else:
         await ctx.send(f"Skipped {data[0].name}")
 
+
 @tasks.loop(hours=36)
 async def called_once_a_day():
     channel = client.get_channel(862542970099204098)
-    #await channel.send(get_random_chisme())
-    #await role_routine(client)
+    await channel.send(get_random_chisme())
+    await role_routine(client)
+
 
 @called_once_a_day.before_loop
 async def before():
     await client.wait_until_ready()
     print("Finished waiting")
 
-called_once_a_day.start()
-client.run(my_secret)
+
+client.run("ODgyNjUxNjQ4Nzg1MjUyNDIz.GR1YtT.9PjN5CQJMcrTnAq_adkvCJ4tynJ01XFHFU1E-g")

@@ -1,13 +1,14 @@
-import requests
-import json
-import discord
-from discord.ext import tasks
-from discord.utils import get
-import random
 from datetime import date
+import random
+import json
+
 import DiscordUtils
-from sqlalchemy.orm import Session
+import discord
+import requests
+from discord.utils import get
 from sqlalchemy import create_engine
+from sqlalchemy.orm import Session
+
 from chismes import Chismes
 
 user = "chismosa_dev"
@@ -17,7 +18,7 @@ db = "chismosa_dev_db"
 
 
 def divide_chunks(l, n):
-    for i in range(0, len(l), n): 
+    for i in range(0, len(l), n):
         yield l[i:i + n]
 
 
@@ -33,6 +34,7 @@ async def send_day_list(ctx, member_list):
     paginator.add_reaction('⏩', "next")
     paginator.add_reaction('⏭️', "last")
     await paginator.run(embeds)
+
 
 def get_all_members(client):
     guild = client.get_guild(862542952937029632)
@@ -69,23 +71,29 @@ def remove_tag(username):
         chars.append(char)
     return "".join(chars)
 
+
 def get_quote():
     response = requests.get("http://zenquotes.io/api/random")
     json_data = json.loads(response.text)
     quote = json_data[0]['q'] + " -James Charles"
-    return(quote)
+    return (quote)
 
 
 def get_random_chisme():
-    engine = create_engine('mysql+mysqldb://{}:{}@{}/{}'.format(user, passw, host, db), pool_size=20, max_overflow=0, pool_pre_ping=True)
+    engine = create_engine('mysql+mysqldb://{}:{}@{}/{}'.format(user, passw, host, db), pool_size=20, max_overflow=0,
+                           pool_pre_ping=True)
     with Session(engine) as session:
         chismes = session.query(Chismes).all()
-        chisme = random.choice(chismes)
-        return chisme.__dict__.get('content')
+        if chismes:
+            chisme = random.choice(chismes)
+            return chisme.__dict__.get('content')
+        else:
+            return "No chismes, you should add some."
 
 
 def get_all_chismes():
-    engine = create_engine('mysql+mysqldb://{}:{}@{}/{}'.format(user, passw, host, db), pool_size=20, max_overflow=0, pool_pre_ping=True)
+    engine = create_engine('mysql+mysqldb://{}:{}@{}/{}'.format(user, passw, host, db), pool_size=20, max_overflow=0,
+                           pool_pre_ping=True)
     chisme_list = []
     with Session(engine) as session:
         chismes = session.query(Chismes).all()
@@ -96,14 +104,17 @@ def get_all_chismes():
 
 
 def update_chismes(chisme):
-    engine = create_engine('mysql+mysqldb://{}:{}@{}/{}'.format(user, passw, host, db), pool_size=20, max_overflow=0, pool_pre_ping=True)
+    engine = create_engine('mysql+mysqldb://{}:{}@{}/{}'.format(user, passw, host, db), pool_size=20, max_overflow=0,
+                           pool_pre_ping=True)
     with Session(engine) as session:
         new_chisme = Chismes(content=chisme)
         session.add(new_chisme)
         session.commit()
 
+
 def delete_chisme(index):
-    engine = create_engine('mysql+mysqldb://{}:{}@{}/{}'.format(user, passw, host, db), pool_size=20, max_overflow=0, pool_pre_ping=True)
+    engine = create_engine('mysql+mysqldb://{}:{}@{}/{}'.format(user, passw, host, db), pool_size=20, max_overflow=0,
+                           pool_pre_ping=True)
     with Session(engine) as session:
         chisme = session.get(Chismes, index)
         if chisme:
@@ -159,7 +170,7 @@ async def role_routine(client):
                 change_list[3].append("{} is now a Sister Mayor! 🙇‍♀️".format(remove_tag(str(member))))
                 await member.add_roles(new_role)
                 await member.remove_roles(old_role)
-    
+
     for i, lis in enumerate(change_list):
         if len(lis) == 1:
             await channel.send(lis[0])
@@ -170,3 +181,4 @@ async def role_routine(client):
             names = ", ".join(names)
             role_name, emoji = role_list[i].split(".")
             await channel.send(f"{names} are now {role_name}!!!{emoji}")
+
