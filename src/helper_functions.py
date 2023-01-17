@@ -1,6 +1,7 @@
 from datetime import date
 import random
 import json
+import youtube_dl
 
 import DiscordUtils
 import discord
@@ -11,15 +12,10 @@ from sqlalchemy.orm import Session
 
 from chismes import Chismes
 
-user = "chismosa_dev"
-passw = "chismosa_dev_pwd"
-host = "localhost"
-db = "chismosa_dev_db"
 
-
-def divide_chunks(l, n):
-    for i in range(0, len(l), n):
-        yield l[i:i + n]
+def divide_chunks(my_list, size):
+    for i in range(0, len(my_list), size):
+        yield my_list[i:i + size]
 
 
 async def send_day_list(ctx, member_list):
@@ -36,17 +32,16 @@ async def send_day_list(ctx, member_list):
     await paginator.run(embeds)
 
 
-def get_all_members(client):
-    guild = client.get_guild(862542952937029632)
-    memberList = guild.members
-    return memberList
+def get_all_members(client, ctx):
+    guild = client.get_guild(ctx.guild.id)
+    member_list = guild.members
+    return member_list
 
 
-def get_member_days(member):
+def get_member_days(ctx):
     today = date.today()
     d1 = today.strftime("%d/%m/%Y")
-    mem_join = member.joined_at
-    member_join_date = mem_join.strftime("%d/%m/%Y")
+    member_join_date = ctx.author.joined_at.strftime("%d/%m/%Y")
     date0 = d1
     date1 = member_join_date
     day0 = int(date0[:2])
@@ -182,3 +177,9 @@ async def role_routine(client):
             role_name, emoji = role_list[i].split(".")
             await channel.send(f"{names} are now {role_name}!!!{emoji}")
 
+
+async def search_song(client, amount, song, get_url=False):
+   info = await client.loop.run_in_executor(None, lambda: youtube_dl.YoutubeDL({"format" : "bestaudio", "quiet" : True}).extract_info(f"ytsearch{amount}:{song}", download=False, ie_key="YoutubeSearch"))
+
+   if len(info["entries"]) == 0: return None
+   return [entry["webpage_url"] for entry in info["entries"]] if get_url else info

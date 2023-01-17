@@ -8,9 +8,15 @@ from discord.ext import commands
 from discord.ext import tasks
 from discord.utils import get
 from dotenv import load_dotenv
+import discord
 
-from chismes import search_song
-from funcs import *
+from helper_functions import (
+    divide_chunks, send_day_list, get_all_members,
+    get_member_days, remove_tag, get_quote, get_random_chisme,
+    get_all_chismes, update_chismes, delete_chisme,
+    role_routine, search_song
+)
+
 from musc import Music
 
 music = Music()
@@ -38,6 +44,9 @@ async def on_member_join(member):
 
 @client.event
 async def on_message(message):
+
+    ctx = await client.get_context(message)
+
     if message.author == client.user:
         return
     if message.content.startswith("test "):
@@ -83,9 +92,9 @@ async def on_message(message):
             await role_routine(client)
 
     if message.content == "Members Count":
-        mem_list = get_all_members(client)
+        mem_list = get_all_members(client, ctx)
         for member in mem_list:
-            print("Member: {} Days in server: {}".format(member, get_member_days(member)))
+            print(f"Member: {member} Days in server: {get_member_days(ctx)}")
 
     if message.content == "List Chismes":
         if str(message.author) not in chisme_permissions:
@@ -110,29 +119,29 @@ async def on_message(message):
 
     if re.match(re.compile("days all", re.I), message.content):
         ctx = await client.get_context(message)
-        members = get_all_members(client)
+        members = get_all_members(client, ctx)
         names = []
         member_dict = {}
         for member in members:
-            member_dict[remove_tag(str(member))] = get_member_days(member)
+            member_dict[remove_tag(str(member))] = get_member_days(ctx)
         sorted_member_dict = sorted(member_dict.items(), key=lambda x: x[1], reverse=True)
         for item in sorted_member_dict:
             names.append("@{}: {} days".format(item[0], item[1]))
         await send_day_list(ctx, names)
 
     if re.match("days [a-z0-9_]+", message.content.lower()):
-        members = get_all_members(client)
+        members = get_all_members(client, ctx)
         username = message.content.split()[1]
         print(username)
         for member in members:
             if remove_tag(str(member)).lower() == username.lower():
                 print(member, username)
                 await message.channel.send(
-                    "@{} has been in the server for {} days!".format(remove_tag(str(member)), get_member_days(member)))
+                    f"@{remove_tag(str(member))} has been in the server for {get_member_days(ctx)} days!")
 
     if re.match(re.compile("my days", re.I), message.content):
         await message.channel.send("@{} has been in the server for {} days!".format(remove_tag(str(message.author)),
-                                                                                    get_member_days(message.author)))
+                                                                                    get_member_days(message.author, ctx)))
 
     if re.match(re.compile("chismosa no hablo ingl(é|e)s", re.I), message.content):
         await message.channel.send("Omg, tienes que descargar Duolingou :mobile_phone:")
@@ -155,12 +164,12 @@ async def on_message(message):
             await message.channel.send("I literally LOVE :woman_gesturing_ok:")
 
     if message.content == "Count our sisters":
-        members = get_all_members(client)
+        members = get_all_members(client, ctx)
         count = len(members)
         for member in members:
             if member.bot:
                 count -= 1
-        await message.channel.send("We currently have {} sisters :woman_technologist: ".format(count))
+        await message.channel.send(f"We currently have {count} sisters :woman_technologist:")
 
     if message.content.startswith("New Chisme"):
         if str(message.author) not in chisme_permissions:
@@ -208,7 +217,7 @@ async def on_ready():
 
 
 @client.event
-async def on_voice_state_update(member, before, after):
+async def on_voice_state_update(member):
     channel = client.get_channel(862591362369191966)
     voice_client = member.guild.voice_client
     if voice_client is None:
@@ -313,4 +322,4 @@ async def before():
     print("Finished waiting")
 
 
-client.run("ODgyNjUxNjQ4Nzg1MjUyNDIz.GR1YtT.9PjN5CQJMcrTnAq_adkvCJ4tynJ01XFHFU1E-g")
+client.run("ODgyNjUxNjQ4Nzg1MjUyNDIz.GAwSCB.wbYNPDwvUJrFz5LvHNUetGkFMZXQAeRkDox_N0")
