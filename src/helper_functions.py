@@ -12,6 +12,11 @@ from sqlalchemy.orm import Session
 
 from chismes import Chismes
 
+user = "chismosa_dev"
+passw = "chismosa_dev_pwd"
+host = "localhost"
+db = "chismosa_dev_db"
+
 
 def divide_chunks(my_list, size):
     for i in range(0, len(my_list), size):

@@ -22,10 +22,9 @@ from musc import Music
 music = Music()
 activity = discord.Activity(type=discord.ActivityType.listening, name="BLACKPINK")
 intents = discord.Intents.all()
-intents.members = True
 client = commands.Bot(command_prefix='Chismosa ', intents=intents, activity=activity)
 load_dotenv()
-my_secret = os.getenv('key')
+CLIENT_TOKEN = os.getenv("CLIENT_TOKEN")
 openai_token = os.getenv('openai_token')
 client.remove_command('help')
 chisme_permissions = ["Shubham#2936", "JuanC#1899"]
@@ -141,7 +140,7 @@ async def on_message(message):
 
     if re.match(re.compile("my days", re.I), message.content):
         await message.channel.send("@{} has been in the server for {} days!".format(remove_tag(str(message.author)),
-                                                                                    get_member_days(message.author, ctx)))
+                                                                                    get_member_days(ctx)))
 
     if re.match(re.compile("chismosa no hablo ingl(é|e)s", re.I), message.content):
         await message.channel.send("Omg, tienes que descargar Duolingou :mobile_phone:")
@@ -157,8 +156,8 @@ async def on_message(message):
         await message.channel.send("At least take me to dinner first!:flushed:")
 
     if re.search(re.compile("(l+i+k+e+|l+o+v+e+)", re.I), message.content):
-        n = random.randint(0, 1)
-        if n == 0:
+        num = random.randint(0, 1)
+        if num == 0:
             await message.channel.send("i… LOVE :woman_gesturing_ok:")
         else:
             await message.channel.send("I literally LOVE :woman_gesturing_ok:")
@@ -203,7 +202,7 @@ async def on_message(message):
         embed = discord.Embed(title="Chismosa Patch Notes v1.7",
                               description="Umghhh, I just added some permissions to some commands xd, remember to use \"Chismosa help\" if you need help with the commands.")
         channel = client.get_channel(862591362369191966)
-        await channel.send(content=None, embed=embed)
+        await message.channel.send(content=None, embed=embed)
 
     if re.match(re.compile("c+h+i+s+m+o+s+a+ +i+ +l+i+k+e+ +m+e+n+", re.I), message.content):
         await message.channel.send("Bien ahí, sigue así, mi nena :woman_tipping_hand:")
@@ -322,4 +321,4 @@ async def before():
     print("Finished waiting")
 
 
-client.run("ODgyNjUxNjQ4Nzg1MjUyNDIz.GAwSCB.wbYNPDwvUJrFz5LvHNUetGkFMZXQAeRkDox_N0")
+client.run(CLIENT_TOKEN)
