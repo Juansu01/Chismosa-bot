@@ -9,13 +9,15 @@ import requests
 from discord.utils import get
 from sqlalchemy import create_engine
 from sqlalchemy.orm import Session
-
+from dotenv import load_dotenv
 from chismes import Chismes
+import os
 
-user = "chismosa_dev"
-passw = "chismosa_dev_pwd"
-host = "localhost"
-db = "chismosa_dev_db"
+load_dotenv()
+DB_USER = os.getenv("DB_USER")
+DB_PASSWORD = os.getenv("DB_PASSWORD")
+HOST = os.getenv("DB_HOST")
+DB_NAME = os.getenv("DB_NAME")
 
 
 def divide_chunks(my_list, size):
@@ -80,8 +82,8 @@ def get_quote():
 
 
 def get_random_chisme():
-    engine = create_engine('mysql+mysqldb://{}:{}@{}/{}'.format(user, passw, host, db), pool_size=20, max_overflow=0,
-                           pool_pre_ping=True)
+    engine = create_engine(f'mysql+mysqldb://{DB_USER}:{DB_PASSWORD}@{HOST}/{DB_NAME}', pool_size=20, max_overflow=0,
+    pool_pre_ping=True)
     with Session(engine) as session:
         chismes = session.query(Chismes).all()
         if chismes:
@@ -92,8 +94,8 @@ def get_random_chisme():
 
 
 def get_all_chismes():
-    engine = create_engine('mysql+mysqldb://{}:{}@{}/{}'.format(user, passw, host, db), pool_size=20, max_overflow=0,
-                           pool_pre_ping=True)
+    engine = create_engine(f'mysql+mysqldb://{DB_USER}:{DB_PASSWORD}@{HOST}/{DB_NAME}', pool_size=20, max_overflow=0,
+    pool_pre_ping=True)
     chisme_list = []
     with Session(engine) as session:
         chismes = session.query(Chismes).all()
@@ -104,8 +106,8 @@ def get_all_chismes():
 
 
 def update_chismes(chisme):
-    engine = create_engine('mysql+mysqldb://{}:{}@{}/{}'.format(user, passw, host, db), pool_size=20, max_overflow=0,
-                           pool_pre_ping=True)
+    engine = create_engine(f'mysql+mysqldb://{DB_USER}:{DB_PASSWORD}@{HOST}/{DB_NAME}', pool_size=20, max_overflow=0,
+    pool_pre_ping=True)
     with Session(engine) as session:
         new_chisme = Chismes(content=chisme)
         session.add(new_chisme)
@@ -113,8 +115,8 @@ def update_chismes(chisme):
 
 
 def delete_chisme(index):
-    engine = create_engine('mysql+mysqldb://{}:{}@{}/{}'.format(user, passw, host, db), pool_size=20, max_overflow=0,
-                           pool_pre_ping=True)
+    engine = create_engine(f'mysql+mysqldb://{DB_USER}:{DB_PASSWORD}@{HOST}/{DB_NAME}', pool_size=20, max_overflow=0,
+    pool_pre_ping=True)
     with Session(engine) as session:
         chisme = session.get(Chismes, index)
         if chisme:
@@ -188,3 +190,9 @@ async def search_song(client, amount, song, get_url=False):
 
    if len(info["entries"]) == 0: return None
    return [entry["webpage_url"] for entry in info["entries"]] if get_url else info
+
+
+def get_channel_id(channels, name):
+    for channel in channels:
+        if channel.name.lower() == name.lower():
+            return channel.id

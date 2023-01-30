@@ -14,7 +14,7 @@ from helper_functions import (
     divide_chunks, send_day_list, get_all_members,
     get_member_days, remove_tag, get_quote, get_random_chisme,
     get_all_chismes, update_chismes, delete_chisme,
-    role_routine, search_song
+    role_routine, search_song, get_channel_id
 )
 
 from musc import Music
@@ -216,8 +216,9 @@ async def on_ready():
 
 
 @client.event
-async def on_voice_state_update(member):
-    channel = client.get_channel(862591362369191966)
+async def on_voice_state_update(member, before, after):
+    channel_id = get_channel_id(member.guild.channels, "General")
+    channel = client.get_channel(channel_id)
     voice_client = member.guild.voice_client
     if voice_client is None:
         return
