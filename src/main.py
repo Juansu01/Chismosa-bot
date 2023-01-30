@@ -65,23 +65,37 @@ async def on_message(message):
         await message.channel.send(response.choices[0].text)
 
     if message.content == "Chismosa help":
-        embed = discord.Embed(title="Help with La Chismosa", description="List of Chismosa commands:")
+        embed = discord.Embed(title="Help with La Chismosa",
+                              description="List of Chismosa commands:")
         embed.add_field(name="Chismosa I'm depressed",
                         value="Use this command to get an inspiring message from Jaime Carlos.")
         embed.add_field(name="Chisme", value="Get a chisme from La Chismosa.")
         embed.add_field(name="Days All",
-                        value="Displays a list of all members showing the days they have been on the server.")
-        embed.add_field(name="Days <username>", value="La Chismosa will tell you the days this user has.")
+                        value="Displays a list of all members showing" 
+                        " the days they have been on the server.")
+        embed.add_field(name="Days <username>",
+                        value="La Chismosa will tell"
+                        " you the days this user has.")
         embed.add_field(name="My Days", value="La Chismosa will tell you your days.")
         embed.add_field(name="Count our sisters", value="Counts current members")
         embed.add_field(name="New Chisme <chisme>", value="Add a new chisme.")
         embed.add_field(name="Del Chisme <number>",
-                        value="Deletes a chisme, number is the positon of the chisme in the current chisme list.")
-        embed.add_field(name="List Chismes", value="Shows all the chismes that La Chismosa is currently holding.")
-        embed.add_field(name="Patch notes", value="La Chismosa will send you a message with her latest change.")
-        embed.add_field(name="Chismosa play <song>", value="La Chismosa will search for the song and play it.")
-        embed.add_field(name="Chismosa pause", value="La Chismosa will pause the song she is currently playing.")
-        embed.add_field(name="Chismosa resume", value="La Chismosa will resume the song she was previously playing.")
+                        value="Deletes a chisme, number is the" 
+                        " positon of the chisme in the current chisme list.")
+        embed.add_field(name="List Chismes",
+                        value="Shows all the chismes that"
+                        " La Chismosa is currently holding.")
+        embed.add_field(name="Patch notes",
+                        value="La Chismosa will send you a"
+                        " message with her latest change.")
+        embed.add_field(name="Chismosa play <song>",
+                        value="La Chismosa will search for the song and play it.")
+        embed.add_field(name="Chismosa pause",
+                        value="La Chismosa will pause the"
+                        " song she is currently playing.")
+        embed.add_field(name="Chismosa resume",
+                        value="La Chismosa will resume the"
+                        " song she was previously playing.")
         embed.add_field(name="Chismosa leave", value="La Chismosa will leave the voice channel.")
         await message.channel.send(content=None, embed=embed)
 
@@ -97,7 +111,8 @@ async def on_message(message):
 
     if message.content == "List Chismes":
         if str(message.author) not in chisme_permissions:
-            await message.channel.send("Gurl, you're liek, not allowed to do that :face_with_hand_over_mouth:")
+            await message.channel.send("Gurl, you're liek, not allowed"
+            "to do that :face_with_hand_over_mouth:")
             return
         chisme_list = divide_chunks(get_all_chismes(), 3)
         for chismes in chisme_list:
@@ -108,7 +123,8 @@ async def on_message(message):
         await message.channel.send(quote)
 
     if re.match(re.compile("(hola|hi|hello|hey) (sister|hermana)", re.I), message.content):
-        await message.channel.send("Oula jermana, ya compraste tu paleta de James Charles hoy?:sunglasses:")
+        await message.channel.send("Oula jermana, ya compraste tu"
+        " paleta de James Charles hoy?:sunglasses:")
 
     if message.content.lower() == 'chisme':
         await message.channel.send(get_random_chisme())
@@ -125,7 +141,7 @@ async def on_message(message):
             member_dict[remove_tag(str(member))] = get_member_days(ctx)
         sorted_member_dict = sorted(member_dict.items(), key=lambda x: x[1], reverse=True)
         for item in sorted_member_dict:
-            names.append("@{}: {} days".format(item[0], item[1]))
+            names.append(f"@{item[0]}: {item[1]} days")
         await send_day_list(ctx, names)
 
     if re.match("days [a-z0-9_]+", message.content.lower()):
@@ -136,17 +152,20 @@ async def on_message(message):
             if remove_tag(str(member)).lower() == username.lower():
                 print(member, username)
                 await message.channel.send(
-                    f"@{remove_tag(str(member))} has been in the server for {get_member_days(ctx)} days!")
+                    f"@{remove_tag(str(member))} has been in"
+                    "the server for {get_member_days(ctx)} days!")
 
     if re.match(re.compile("my days", re.I), message.content):
-        await message.channel.send("@{} has been in the server for {} days!".format(remove_tag(str(message.author)),
-                                                                                    get_member_days(ctx)))
+        member_name = remove_tag(str(message.author))
+        member_days = get_member_days(ctx)
+        await message.channel.send(f"@{member_name} has been in the server for {member_days} days!")
 
     if re.match(re.compile("chismosa no hablo ingl(é|e)s", re.I), message.content):
         await message.channel.send("Omg, tienes que descargar Duolingou :mobile_phone:")
 
-    if re.search(re.compile("(p+u+t+a+|p+u+t+o+|f+u+c+k+|f+a+g+o*t*|s+h+i+t+|b+i+t+c+h+|c+u+n+t+)", re.I),
-                 message.content):
+    if re.search(
+        re.compile("(p+u+t+a+|p+u+t+o+|f+u+c+k+|f+a+g+o*t*|s+h+i+t+|b+i+t+c+h+|c+u+n+t+)", re.I),
+                   message.content):
         await message.channel.send("Watch your language sister!:nail_care:")
 
     if re.search(re.compile("s+h+o+(pp)+i+n+g+", re.I), message.content):
@@ -156,9 +175,11 @@ async def on_message(message):
         await message.channel.send("At least take me to dinner first!:flushed:")
 
     if re.search(re.compile("(l+i+k+e+|l+o+v+e+)", re.I), message.content):
-        num = random.randint(0, 1)
+        num = random.randint(0, 2)
         if num == 0:
             await message.channel.send("i… LOVE :woman_gesturing_ok:")
+        elif num == 1:
+            await message.channel.send("No wayy, I truly love :smiling_face_with_3_hearts:")
         else:
             await message.channel.send("I literally LOVE :woman_gesturing_ok:")
 
@@ -172,22 +193,26 @@ async def on_message(message):
 
     if message.content.startswith("New Chisme"):
         if str(message.author) not in chisme_permissions:
-            await message.channel.send("Gurl, you're liek, not allowed to do that :face_with_hand_over_mouth:")
+            await message.channel.send("Gurl, you're liek, not allowed" 
+            " to do that :face_with_hand_over_mouth:")
             return
         chisme = str(message.content).replace("New Chisme ", "")
         update_chismes(chisme)
-        await message.channel.send("Ummhgg, qué buen chisme hermana, tengo que guardarlo :woman_tipping_hand:")
+        await message.channel.send("Ummhgg, qué buen chisme hermana," 
+        " tengo que guardarlo :woman_tipping_hand:")
 
     if message.content.startswith("Del Chisme"):
         if str(message.author) not in chisme_permissions:
-            await message.channel.send("Gurl, you're liek, not allowed to do that :face_with_hand_over_mouth:")
+            await message.channel.send("Gurl, you're liek, not allowed to "
+            "do that :face_with_hand_over_mouth:")
             return
         index = int(message.content.split('Del Chisme ', 1)[1])
         deleted = delete_chisme(index)
         if deleted:
             await message.channel.send("Ugh I hated that Chisme, it's gone now :face_gun_smiling:")
         else:
-            await message.channel.send("Hermanaa, you just gave me a wrong id, estás bien?? :rolling_eyes: ")
+            await message.channel.send("Hermanaa, you just gave me a wrong"
+            "id, estás bien?? :rolling_eyes: ")
 
     if "men" in str(message.content.lower()):
         if "women" in str(message.content.lower()) or "Women" in str(message.content):
@@ -200,7 +225,9 @@ async def on_message(message):
 
     if message.content.startswith("Send patch notes"):
         embed = discord.Embed(title="Chismosa Patch Notes v1.7",
-                              description="Umghhh, I just added some permissions to some commands xd, remember to use \"Chismosa help\" if you need help with the commands.")
+                              description="Umghhh, I just added some "
+                              "permissions to some commands xd, remember to use" 
+                              " \"Chismosa help\" if you need help with the commands.")
         channel = client.get_channel(862591362369191966)
         await message.channel.send(content=None, embed=embed)
 
@@ -212,7 +239,7 @@ async def on_message(message):
 
 @client.event
 async def on_ready():
-    print("Our bot is logged in as {0.user}".format(client))
+    print(f"Our bot is logged in as {client.user}")
 
 
 @client.event
