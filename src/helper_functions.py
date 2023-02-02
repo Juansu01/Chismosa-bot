@@ -177,13 +177,13 @@ async def role_routine(client, ctx):
             new_role = get(member.guild.roles, name="Sister Menor")
             old_role = get(member.guild.roles, name="Sister")
             if new_role not in roles:
-                
+                await umf.update_member_role(member, old_role, new_role)
                 change_list[1].append(f"{remove_tag(str(member))} is now a Sister Menor! 🙆‍♀️")
         elif days >= 180 and days < 300:
             new_role = get(member.guild.roles, name="Hermana del Medio")
             old_role = get(member.guild.roles, name="Sister Menor")
             if new_role not in roles:
-                
+                await umf.update_member_role(member, old_role, new_role)
                 change_list[2].append(f"{remove_tag(str(member))} is now a Hermana del Medio! 💇‍♀️")
         elif days >= 300:
             new_role = get(member.guild.roles, name="Sister Mayor")
