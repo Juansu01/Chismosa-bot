@@ -17,6 +17,8 @@ from helper_functions import (
     role_routine, search_song, get_channel_id
 )
 
+from user_management_functions import send_bot_help
+
 from musc import Music
 
 music = Music()
@@ -65,44 +67,11 @@ async def on_message(message):
         await message.channel.send(response.choices[0].text)
 
     if message.content == "Chismosa help":
-        embed = discord.Embed(title="Help with La Chismosa",
-                              description="List of Chismosa commands:")
-        embed.add_field(name="Chismosa I'm depressed",
-                        value="Use this command to get an inspiring message from Jaime Carlos.")
-        embed.add_field(name="Chisme", value="Get a chisme from La Chismosa.")
-        embed.add_field(name="Days All",
-                        value="Displays a list of all members showing" 
-                        " the days they have been on the server.")
-        embed.add_field(name="Days <username>",
-                        value="La Chismosa will tell"
-                        " you the days this user has.")
-        embed.add_field(name="My Days", value="La Chismosa will tell you your days.")
-        embed.add_field(name="Count our sisters", value="Counts current members")
-        embed.add_field(name="New Chisme <chisme>", value="Add a new chisme.")
-        embed.add_field(name="Del Chisme <number>",
-                        value="Deletes a chisme, number is the" 
-                        " positon of the chisme in the current chisme list.")
-        embed.add_field(name="List Chismes",
-                        value="Shows all the chismes that"
-                        " La Chismosa is currently holding.")
-        embed.add_field(name="Patch notes",
-                        value="La Chismosa will send you a"
-                        " message with her latest change.")
-        embed.add_field(name="Chismosa play <song>",
-                        value="La Chismosa will search for the song and play it.")
-        embed.add_field(name="Chismosa pause",
-                        value="La Chismosa will pause the"
-                        " song she is currently playing.")
-        embed.add_field(name="Chismosa resume",
-                        value="La Chismosa will resume the"
-                        " song she was previously playing.")
-        embed.add_field(name="Chismosa leave", value="La Chismosa will leave the voice channel.")
-        await message.channel.send(content=None, embed=embed)
+        await send_bot_help(message.channel)
 
     if message.content == "do routine":
         if str(message.author) == "JuanC#1899":
-            print("im here")
-            await role_routine(client)
+            await role_routine(client, ctx)
 
     if message.content == "Members Count":
         mem_list = get_all_members(client, ctx)
@@ -329,16 +298,12 @@ async def leave(ctx):
 async def skip(ctx):
     player = music.get_player(guild_id=ctx.guild.id)
     data = await player.skip(force=True)
-    if len(data) == 2:
-        await ctx.send(f"Skipped from {data[0].name} to {data[1].name}")
-        print(data[1])
-    else:
-        await ctx.send(f"Skipped {data[0].name}")
+    await ctx.send(f"Skipped {data[0].name}")
 
 
 @tasks.loop(hours=36)
 async def called_once_a_day():
-    channel = client.get_channel(862542970099204098)
+    channel = client.get_channel(get_channel_id(client.guild.channels, "General"))
     await channel.send(get_random_chisme())
     await role_routine(client)
 

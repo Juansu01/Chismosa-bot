@@ -1,17 +1,21 @@
-from datetime import date
 import random
 import json
-import youtube_dl
+import os
 
+from datetime import date
+import youtube_dl
+import requests
 import DiscordUtils
 import discord
-import requests
 from discord.utils import get
 from sqlalchemy import create_engine
 from sqlalchemy.orm import Session
 from dotenv import load_dotenv
+
+import user_management_functions as umf
 from chismes import Chismes
-import os
+
+
 
 load_dotenv()
 DB_USER = os.getenv("DB_USER")
@@ -19,10 +23,36 @@ DB_PASSWORD = os.getenv("DB_PASSWORD")
 HOST = os.getenv("DB_HOST")
 DB_NAME = os.getenv("DB_NAME")
 
+def get_engine():
+    """
+    Returns engine object.
+    """
+    engine = create_engine(f'mysql+mysqldb://{DB_USER}:{DB_PASSWORD}@{HOST}/{DB_NAME}',
+                           pool_size=20, max_overflow=0,
+                           pool_pre_ping=True)
+
+    return engine
+
 
 def divide_chunks(my_list, size):
+    """
+    Takes in a list and yields chunks of length size.
+    """
     for i in range(0, len(my_list), size):
         yield my_list[i:i + size]
+
+
+def get_channel_id(channels, name):
+    """
+    Takes in a list of channels to find the channel
+    that matches the name argument.
+    """
+    for channel in channels:
+        if channel.name.lower() == name.lower():
+            return channel.id
+
+    return None
+
 
 
 async def send_day_list(ctx, member_list):
@@ -82,8 +112,7 @@ def get_quote():
 
 
 def get_random_chisme():
-    engine = create_engine(f'mysql+mysqldb://{DB_USER}:{DB_PASSWORD}@{HOST}/{DB_NAME}', pool_size=20, max_overflow=0,
-    pool_pre_ping=True)
+    engine = get_engine()
     with Session(engine) as session:
         chismes = session.query(Chismes).all()
         if chismes:
@@ -94,8 +123,7 @@ def get_random_chisme():
 
 
 def get_all_chismes():
-    engine = create_engine(f'mysql+mysqldb://{DB_USER}:{DB_PASSWORD}@{HOST}/{DB_NAME}', pool_size=20, max_overflow=0,
-    pool_pre_ping=True)
+    engine = get_engine()
     chisme_list = []
     with Session(engine) as session:
         chismes = session.query(Chismes).all()
@@ -106,8 +134,7 @@ def get_all_chismes():
 
 
 def update_chismes(chisme):
-    engine = create_engine(f'mysql+mysqldb://{DB_USER}:{DB_PASSWORD}@{HOST}/{DB_NAME}', pool_size=20, max_overflow=0,
-    pool_pre_ping=True)
+    engine = get_engine()
     with Session(engine) as session:
         new_chisme = Chismes(content=chisme)
         session.add(new_chisme)
@@ -115,8 +142,7 @@ def update_chismes(chisme):
 
 
 def delete_chisme(index):
-    engine = create_engine(f'mysql+mysqldb://{DB_USER}:{DB_PASSWORD}@{HOST}/{DB_NAME}', pool_size=20, max_overflow=0,
-    pool_pre_ping=True)
+    engine = get_engine()
     with Session(engine) as session:
         chisme = session.get(Chismes, index)
         if chisme:
@@ -126,14 +152,14 @@ def delete_chisme(index):
     return False
 
 
-async def role_routine(client):
+async def role_routine(client, ctx):
     role_list = ["Sister.💁‍♀️", "Sister Menor.🙆‍♀️", "Hermana del Medio.💇‍♀️", "Sister Mayor.🙇‍♀️"]
-    channel = client.get_channel(862591362369191966)
-    member_list = get_all_members(client)
+    channel = client.get_channel(get_channel_id(ctx.guild.channels, "General"))
+    member_list = get_all_members(client, ctx)
     change_list = [[], [], [], []]
     for member in member_list:
-        print("Checking: {}".format(member))
-        days = get_member_days(member)
+        print(f"Checking: {format(member)}")
+        days = get_member_days(ctx)
         roles = member.roles
         role = get(member.guild.roles, name="Spambot 🤖")
         role2 = get(member.guild.roles, name="Music Bot 🎶")
@@ -144,41 +170,34 @@ async def role_routine(client):
             new_role = get(member.guild.roles, name="Sister")
             old_role = get(member.guild.roles, name="Hermanastra")
             if new_role not in roles:
-                print("Granting: {} role: Sister".format(member))
-                change_list[0].append("{} is now a Sister! 💁‍♀️".format(remove_tag(str(member))))
-                await member.add_roles(new_role)
-                await member.remove_roles(old_role)
+                await umf.update_member_role(member, old_role, new_role)
+                change_list[0].append(f"{remove_tag(str(member))} is now a Sister! 💁‍♀️")
+                
         elif days >= 90 and days < 180:
             new_role = get(member.guild.roles, name="Sister Menor")
             old_role = get(member.guild.roles, name="Sister")
             if new_role not in roles:
-                print("Granting: {} role: Sister Menor".format(member))
-                change_list[1].append("{} is now a Sister Menor! 🙆‍♀️".format(remove_tag(str(member))))
-                await member.add_roles(new_role)
-                await member.remove_roles(old_role)
+                
+                change_list[1].append(f"{remove_tag(str(member))} is now a Sister Menor! 🙆‍♀️")
         elif days >= 180 and days < 300:
             new_role = get(member.guild.roles, name="Hermana del Medio")
             old_role = get(member.guild.roles, name="Sister Menor")
             if new_role not in roles:
-                print("Granting: {} role: Hermana del Medio".format(member))
-                change_list[2].append("{} is now a Hermana del Medio! 💇‍♀️".format(remove_tag(str(member))))
-                await member.add_roles(new_role)
-                await member.remove_roles(old_role)
+                
+                change_list[2].append(f"{remove_tag(str(member))} is now a Hermana del Medio! 💇‍♀️")
         elif days >= 300:
             new_role = get(member.guild.roles, name="Sister Mayor")
             old_role = get(member.guild.roles, name="Hermana del Medio")
             if new_role not in roles:
-                print("Granting: {} role: Sister Mayor".format(member))
-                change_list[3].append("{} is now a Sister Mayor! 🙇‍♀️".format(remove_tag(str(member))))
-                await member.add_roles(new_role)
-                await member.remove_roles(old_role)
+                await umf.update_member_role(member, old_role, new_role)
+                change_list[3].append(f"{remove_tag(str(member))} is now a Sister Mayor! 🙇‍♀️")
 
-    for i, lis in enumerate(change_list):
-        if len(lis) == 1:
-            await channel.send(lis[0])
-        elif len(lis) > 1:
+    for i, role_update in enumerate(change_list):
+        if len(role_update) == 1:
+            await channel.send(role_update[0])
+        elif len(role_update) > 1:
             names = []
-            for memb in lis:
+            for memb in role_update:
                 names.append(memb.split(' is')[0])
             names = ", ".join(names)
             role_name, emoji = role_list[i].split(".")
@@ -186,13 +205,19 @@ async def role_routine(client):
 
 
 async def search_song(client, amount, song, get_url=False):
-   info = await client.loop.run_in_executor(None, lambda: youtube_dl.YoutubeDL({"format" : "bestaudio", "quiet" : True}).extract_info(f"ytsearch{amount}:{song}", download=False, ie_key="YoutubeSearch"))
+    """
+    Searches for a song on YouTube using YouTubeDL
+    If entries for the song are found they will be returned,
+    otherwise None will be returned.
+    """
+    info = await client.loop.run_in_executor(None,
+        lambda: youtube_dl.YoutubeDL({"format" : "bestaudio", "quiet" : True}
+        ).extract_info(f"ytsearch{amount}:{song}",
+                       download=False,
+                       ie_key="YoutubeSearch")
+   )
 
-   if len(info["entries"]) == 0: return None
-   return [entry["webpage_url"] for entry in info["entries"]] if get_url else info
+    if len(info["entries"]) == 0:
+        return None
 
-
-def get_channel_id(channels, name):
-    for channel in channels:
-        if channel.name.lower() == name.lower():
-            return channel.id
+    return [entry["webpage_url"] for entry in info["entries"]] if get_url else info
